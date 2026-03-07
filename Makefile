@@ -27,8 +27,10 @@ test_layout: tests/unit/test_layout.c src/core/arena.c src/core/node.c src/layou
 	$(CC) $(CFLAGS) -o $@ tests/unit/test_layout.c src/core/arena.c src/core/node.c src/layout/layout.c src/font/atlas.c $(LDFLAGS)
 test_font: tests/unit/test_font.c src/font/atlas.c
 	$(CC) $(CFLAGS) -o $@ tests/unit/test_font.c src/font/atlas.c $(LDFLAGS)
-unit-tests: test_arena test_vault test_layout test_font
-	./test_arena && ./test_vault && ./test_layout && ./test_font
+test_draw_buf: $(OBJS) tests/unit/test_draw_buf.c
+	$(CC) $(CFLAGS) -o $@ tests/unit/test_draw_buf.c $(OBJS) $(LDFLAGS)
+unit-tests: test_arena test_vault test_layout test_font test_draw_buf
+	./test_arena && ./test_vault && ./test_layout && ./test_font && ./test_draw_buf
 
 # Integration test: Hello World pipeline (Phase 3)
 test_hello: $(OBJS) tests/integration/test_hello.c
@@ -46,6 +48,6 @@ integration-tests: test_hello test_counter test_rdi_platform
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -f $(OBJS) build/*.o build/*.a hello counter test_arena test_vault test_layout test_font test_hello test_counter test_rdi_platform 2>/dev/null; true
+	rm -f $(OBJS) build/*.o build/*.a hello counter test_arena test_vault test_layout test_font test_draw_buf test_hello test_counter test_rdi_platform 2>/dev/null; true
 
 .PHONY: all clean unit-tests integration-tests

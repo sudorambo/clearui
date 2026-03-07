@@ -40,6 +40,7 @@ const cui_style  *cui_ctx_current_style(cui_ctx *ctx);
 void             cui_ctx_set_canvas_node(cui_ctx *ctx, cui_node *n);
 cui_node        *cui_ctx_canvas_node(cui_ctx *ctx);
 cui_draw_command_buffer *cui_ctx_canvas_buf(cui_ctx *ctx);
+cui_draw_command_buffer *cui_ctx_scaled_buf(cui_ctx *ctx);
 cui_draw_command_buffer *cui_ctx_current_draw_buf(cui_ctx *ctx);
 
 const char       *cui_ctx_focused_id(cui_ctx *ctx);

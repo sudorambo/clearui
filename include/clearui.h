@@ -21,6 +21,7 @@ typedef struct cui_config {
 	int        width;
 	int        height;
 	float      scale_factor;   /* display scale (1.0 = 100%); set from platform for Hi-DPI */
+	size_t     draw_buf_capacity; /* 0 = default 1024; >0 = max draw commands per buffer */
 } cui_config;
 
 /* Layout options for row/column/center/stack/wrap. (cui_layout){} is valid. */

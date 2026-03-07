@@ -30,6 +30,7 @@ struct cui_ctx {
 	void            *rdi_ctx;
 	cui_draw_command_buffer draw_buf;
 	cui_draw_command_buffer canvas_cmd_buf;
+	cui_draw_command_buffer scaled_buf;
 	cui_node        *canvas_node_for_buf;
 	cui_node        *declared_root;
 	cui_node        *retained_root;
@@ -125,6 +126,20 @@ cui_ctx *cui_create(const cui_config *config) {
 		ctx->config = *config;
 		if (ctx->config.scale_factor <= 0.f) ctx->config.scale_factor = 1.f;
 	}
+	size_t cap = (config && config->draw_buf_capacity > 0) ? config->draw_buf_capacity : 1024;
+	cui_draw_buf_init(&ctx->draw_buf, cap);
+	cui_draw_buf_init(&ctx->canvas_cmd_buf, cap);
+	cui_draw_buf_init(&ctx->scaled_buf, cap);
+	if (ctx->draw_buf.capacity != cap || ctx->canvas_cmd_buf.capacity != cap || ctx->scaled_buf.capacity != cap) {
+		cui_draw_buf_fini(&ctx->draw_buf);
+		cui_draw_buf_fini(&ctx->canvas_cmd_buf);
+		cui_draw_buf_fini(&ctx->scaled_buf);
+		cui_vault_destroy(ctx->vault);
+		cui_frame_allocator_free(&ctx->frame);
+		cui_arena_free(&ctx->arena);
+		free(ctx);
+		return NULL;
+	}
 	return ctx;
 }
 
@@ -219,6 +234,9 @@ int cui_running(cui_ctx *ctx) {
 
 void cui_destroy(cui_ctx *ctx) {
 	if (!ctx) return;
+	cui_draw_buf_fini(&ctx->draw_buf);
+	cui_draw_buf_fini(&ctx->canvas_cmd_buf);
+	cui_draw_buf_fini(&ctx->scaled_buf);
 	cui_vault_destroy(ctx->vault);
 	cui_frame_allocator_free(&ctx->frame);
 	cui_arena_free(&ctx->arena);
@@ -265,6 +283,10 @@ cui_node *cui_ctx_canvas_node(cui_ctx *ctx) {
 
 cui_draw_command_buffer *cui_ctx_canvas_buf(cui_ctx *ctx) {
 	return ctx ? &ctx->canvas_cmd_buf : NULL;
+}
+
+cui_draw_command_buffer *cui_ctx_scaled_buf(cui_ctx *ctx) {
+	return ctx ? &ctx->scaled_buf : NULL;
 }
 
 cui_draw_command_buffer *cui_ctx_current_draw_buf(cui_ctx *ctx) {

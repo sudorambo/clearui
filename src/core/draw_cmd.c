@@ -2,6 +2,7 @@
 #include "node.h"
 #include "core/context.h"
 #include "core/theme.h"
+#include <stdlib.h>
 #include <string.h>
 
 #define DECO_STRIKETHROUGH 1
@@ -94,12 +95,27 @@ void cui_build_draw_from_tree(cui_ctx *ctx, cui_node *root, cui_draw_command_buf
 		cui_build_draw_from_tree(ctx, c, buf, ox, oy);
 }
 
+void cui_draw_buf_init(cui_draw_command_buffer *buf, size_t capacity) {
+	if (!buf || capacity == 0) return;
+	buf->cmd = (cui_draw_cmd *)malloc(sizeof(cui_draw_cmd) * capacity);
+	buf->capacity = buf->cmd ? capacity : 0;
+	buf->count = 0;
+}
+
+void cui_draw_buf_fini(cui_draw_command_buffer *buf) {
+	if (!buf) return;
+	free(buf->cmd);
+	buf->cmd = NULL;
+	buf->capacity = 0;
+	buf->count = 0;
+}
+
 void cui_draw_buf_clear(cui_draw_command_buffer *buf) {
 	if (buf) buf->count = 0;
 }
 
 int cui_draw_buf_push_rect(cui_draw_command_buffer *buf, float x, float y, float w, float h, unsigned int color) {
-	if (!buf || buf->count >= CUI_DRAW_BUF_MAX) return -1;
+	if (!buf || !buf->cmd || buf->count >= buf->capacity) return -1;
 	buf->cmd[buf->count].type = CUI_CMD_RECT;
 	buf->cmd[buf->count].u.fill_rect.x = x;
 	buf->cmd[buf->count].u.fill_rect.y = y;
@@ -111,7 +127,7 @@ int cui_draw_buf_push_rect(cui_draw_command_buffer *buf, float x, float y, float
 }
 
 int cui_draw_buf_push_line(cui_draw_command_buffer *buf, float x0, float y0, float x1, float y1, float thickness, unsigned int color) {
-	if (!buf || buf->count >= CUI_DRAW_BUF_MAX) return -1;
+	if (!buf || !buf->cmd || buf->count >= buf->capacity) return -1;
 	buf->cmd[buf->count].type = CUI_CMD_LINE;
 	buf->cmd[buf->count].u.line.a.x = x0;
 	buf->cmd[buf->count].u.line.a.y = y0;
@@ -124,7 +140,7 @@ int cui_draw_buf_push_line(cui_draw_command_buffer *buf, float x0, float y0, flo
 }
 
 int cui_draw_buf_push_text(cui_draw_command_buffer *buf, float x, float y, const char *text, unsigned int color) {
-	if (!buf || buf->count >= CUI_DRAW_BUF_MAX || !text) return -1;
+	if (!buf || !buf->cmd || buf->count >= buf->capacity || !text) return -1;
 	buf->cmd[buf->count].type = CUI_CMD_TEXT;
 	buf->cmd[buf->count].u.text.x = x;
 	buf->cmd[buf->count].u.text.y = y;

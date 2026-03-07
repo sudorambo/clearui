@@ -50,10 +50,13 @@ typedef struct {
 #define CUI_DRAW_BUF_MAX 1024
 
 typedef struct cui_draw_command_buffer {
-	cui_draw_cmd cmd[CUI_DRAW_BUF_MAX];
+	cui_draw_cmd *cmd;
+	size_t       capacity;
 	size_t       count;
 } cui_draw_command_buffer;
 
+void cui_draw_buf_init(cui_draw_command_buffer *buf, size_t capacity);
+void cui_draw_buf_fini(cui_draw_command_buffer *buf);
 void cui_draw_buf_clear(cui_draw_command_buffer *buf);
 int  cui_draw_buf_push_rect(cui_draw_command_buffer *buf, float x, float y, float w, float h, unsigned int color);
 int  cui_draw_buf_push_line(cui_draw_command_buffer *buf, float x0, float y0, float x1, float y1, float thickness, unsigned int color);

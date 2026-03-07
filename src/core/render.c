@@ -10,7 +10,7 @@
 static void scale_buf(const cui_draw_command_buffer *src, cui_draw_command_buffer *dst, float scale) {
 	if (!src || !dst || scale <= 0) return;
 	dst->count = 0;
-	for (size_t i = 0; i < src->count && dst->count < CUI_DRAW_BUF_MAX; i++) {
+	for (size_t i = 0; i < src->count && dst->count < dst->capacity; i++) {
 		const cui_draw_cmd *c = &src->cmd[i];
 		cui_draw_cmd *out = &dst->cmd[dst->count];
 		out->type = c->type;
@@ -69,10 +69,12 @@ void cui_render_submit(cui_ctx *ctx) {
 		if (rdi->submit && rdi_ctx)
 			rdi->submit(rdi_ctx, buf);
 	} else {
-		static cui_draw_command_buffer scaled_buf;
-		scale_buf(buf, &scaled_buf, scale);
-		if (rdi->submit && rdi_ctx)
-			rdi->submit(rdi_ctx, &scaled_buf);
+		cui_draw_command_buffer *scaled = cui_ctx_scaled_buf(ctx);
+		if (scaled) {
+			scale_buf(buf, scaled, scale);
+			if (rdi->submit && rdi_ctx)
+				rdi->submit(rdi_ctx, scaled);
+		}
 	}
 	if (rdi->present && rdi_ctx)
 		rdi->present(rdi_ctx);
