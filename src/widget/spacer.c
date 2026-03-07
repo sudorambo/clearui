@@ -1,6 +1,6 @@
-#include "core/context.h"
-#include "core/node.h"
-#include "clearui.h"
+#include "../core/context.h"
+#include "../core/node.h"
+#include "../../include/clearui.h"
 
 void cui_spacer(cui_ctx *ctx, float w, float h) {
 	if (!ctx) return;

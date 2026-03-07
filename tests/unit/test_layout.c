@@ -1,9 +1,9 @@
 /**
  * Unit test for layout engine: row/column with gap and align.
  */
-#include "core/arena.h"
-#include "core/node.h"
-#include "layout/layout.h"
+#include "../../src/core/arena.h"
+#include "../../src/core/node.h"
+#include "../../src/layout/layout.h"
 #include <assert.h>
 #include <stdio.h>
 

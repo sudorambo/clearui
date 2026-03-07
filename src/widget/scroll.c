@@ -1,6 +1,6 @@
-#include "core/context.h"
-#include "core/node.h"
-#include "clearui.h"
+#include "../core/context.h"
+#include "../core/node.h"
+#include "../../include/clearui.h"
 
 void cui_scroll(cui_ctx *ctx, const cui_scroll_opts *opts) {
 	if (!ctx) return;

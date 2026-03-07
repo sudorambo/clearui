@@ -2,9 +2,9 @@
  * Full draw command submission: take context draw buffer, apply scale (Hi-DPI),
  * submit to RDI and present. Same buffer format consumed by software and GPU drivers.
  */
-#include "core/context.h"
-#include "core/draw_cmd.h"
-#include "clearui_rdi.h"
+#include "context.h"
+#include "draw_cmd.h"
+#include "../../include/clearui_rdi.h"
 #include <string.h>
 
 static void scale_buf(const cui_draw_command_buffer *src, cui_draw_command_buffer *dst, float scale) {

@@ -1,5 +1,5 @@
-#include "clearui_rdi.h"
-#include "core/draw_cmd.h"
+#include "../../include/clearui_rdi.h"
+#include "../core/draw_cmd.h"
 #include <stdlib.h>
 #include <string.h>
 

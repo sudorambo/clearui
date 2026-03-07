@@ -1,6 +1,6 @@
-#include "core/context.h"
-#include "core/node.h"
-#include "clearui.h"
+#include "../core/context.h"
+#include "../core/node.h"
+#include "../../include/clearui.h"
 #include <string.h>
 
 int cui_text_input(cui_ctx *ctx, const char *id, char *buffer, size_t capacity, const cui_text_input_opts *opts) {

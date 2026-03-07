@@ -1,7 +1,7 @@
 #include "draw_cmd.h"
 #include "node.h"
-#include "core/context.h"
-#include "core/theme.h"
+#include "context.h"
+#include "theme.h"
 #include <stdlib.h>
 #include <string.h>
 

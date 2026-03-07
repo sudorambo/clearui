@@ -1,4 +1,4 @@
-#include "core/vault.h"
+#include "../../src/core/vault.h"
 #include <assert.h>
 #include <string.h>
 

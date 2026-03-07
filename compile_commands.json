@@ -1,0 +1,12 @@
+[
+  {
+    "directory": ".",
+    "command": "cc -std=c11 -Wall -Wextra -Wpedantic -I. -Iinclude -Isrc -Isrc/core -c -o src/core/a11y.o src/core/a11y.c",
+    "file": "src/core/a11y.c"
+  },
+  {
+    "directory": ".",
+    "command": "cc -std=c11 -Wall -Wextra -Wpedantic -I. -Iinclude -Isrc -Isrc/core -c -o src/core/context.o src/core/context.c",
+    "file": "src/core/context.c"
+  }
+]

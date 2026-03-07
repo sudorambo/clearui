@@ -2,9 +2,9 @@
  * Integration test: RDI + platform (stub) init, one frame submit, shutdown.
  * Complements T019 / test_hello by asserting RDI and platform contract.
  */
-#include "clearui.h"
-#include "clearui_platform.h"
-#include "clearui_rdi.h"
+#include "../../include/clearui.h"
+#include "../../include/clearui_platform.h"
+#include "../../include/clearui_rdi.h"
 #include <assert.h>
 #include <stdio.h>
 

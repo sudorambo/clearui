@@ -1,6 +1,6 @@
 # ClearUI - C11 build (plan.md: -std=c11 -Wall -Wextra -Wpedantic)
 CC     ?= cc
-CFLAGS := -std=c11 -Wall -Wextra -Wpedantic -I. -Iinclude -Isrc
+CFLAGS := -std=c11 -Wall -Wextra -Wpedantic -I. -Iinclude -Isrc -Isrc/core
 LDFLAGS := -lm
 
 # Sources (expand as implementation grows)

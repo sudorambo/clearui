@@ -2,7 +2,7 @@
  * Headless platform stub: no window, poll_events always returns true.
  * For CI and tests. Use SDL3 adapter for real window.
  */
-#include "clearui_platform.h"
+#include "../../include/clearui_platform.h"
 #include <stdlib.h>
 #include <string.h>
 

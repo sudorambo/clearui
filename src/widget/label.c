@@ -1,7 +1,6 @@
-#include "core/context.h"
-#include "core/node.h"
-#include "clearui.h"
-#include <string.h>
+#include "../core/context.h"
+#include "../core/node.h"
+#include "../../include/clearui.h"
 
 void cui_label(cui_ctx *ctx, const char *text) {
 	if (!ctx || !text) return;

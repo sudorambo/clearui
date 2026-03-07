@@ -3,10 +3,9 @@
  * CENTER, ROW, COLUMN, STACK, WRAP containers; leaf nodes get intrinsic or default size.
  */
 #include "layout.h"
-#include "core/node.h"
-#include "core/theme.h"
-#include "font/atlas.h"
-#include <string.h>
+#include "../core/node.h"
+#include "../core/theme.h"
+#include "../font/atlas.h"
 
 #define ALIGN_START   0
 #define ALIGN_CENTER  1

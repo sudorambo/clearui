@@ -1,7 +1,7 @@
-#include "core/context.h"
-#include "core/node.h"
-#include "core/draw_cmd.h"
-#include "clearui.h"
+#include "../core/context.h"
+#include "../core/node.h"
+#include "../core/draw_cmd.h"
+#include "../../include/clearui.h"
 
 void cui_canvas(cui_ctx *ctx, const cui_canvas_opts *opts) {
 	if (!ctx) return;

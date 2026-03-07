@@ -2,9 +2,9 @@
  * Integration test: Hello World pipeline.
  * Context + stub platform + soft RDI; one frame with center + label.
  */
-#include "clearui.h"
-#include "clearui_platform.h"
-#include "clearui_rdi.h"
+#include "../../include/clearui.h"
+#include "../../include/clearui_platform.h"
+#include "../../include/clearui_rdi.h"
 #include <assert.h>
 #include <stdio.h>
 

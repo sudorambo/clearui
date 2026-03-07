@@ -1,7 +1,6 @@
-#include "core/context.h"
-#include "core/node.h"
-#include "clearui.h"
-#include <string.h>
+#include "../core/context.h"
+#include "../core/node.h"
+#include "../../include/clearui.h"
 
 int cui_checkbox(cui_ctx *ctx, const char *id, int *checked) {
 	if (!ctx || !id) return 0;

@@ -2,9 +2,9 @@
  * Build accessibility tree from declared/retained tree: role, label, state, bounds.
  * Exposed for platform layer (UI Automation, NSAccessibility, AT-SPI2).
  */
-#include "core/a11y.h"
-#include "core/context.h"
-#include "core/node.h"
+#include "a11y.h"
+#include "context.h"
+#include "node.h"
 #include <string.h>
 
 static cui_a11y_role node_to_role(const cui_node *n) {

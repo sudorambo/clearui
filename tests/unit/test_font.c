@@ -1,7 +1,7 @@
 /**
  * Unit test for font atlas text measurement.
  */
-#include "font/atlas.h"
+#include "../../src/font/atlas.h"
 #include <assert.h>
 #include <stdio.h>
 

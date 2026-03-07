@@ -1,6 +1,6 @@
-#include "core/context.h"
-#include "core/node.h"
-#include "clearui.h"
+#include "../core/context.h"
+#include "../core/node.h"
+#include "../../include/clearui.h"
 #include <string.h>
 
 static void copy_layout_opts(cui_node_layout *dst, const cui_layout *src) {

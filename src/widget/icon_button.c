@@ -1,7 +1,6 @@
-#include "core/context.h"
-#include "core/node.h"
-#include "clearui.h"
-#include <string.h>
+#include "../core/context.h"
+#include "../core/node.h"
+#include "../../include/clearui.h"
 
 int cui_icon_button(cui_ctx *ctx, const char *id, int icon) {
 	(void)icon;

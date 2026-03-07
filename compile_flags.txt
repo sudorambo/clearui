@@ -1,0 +1,6 @@
+-xc
+-I.
+-Iinclude
+-Isrc
+-Isrc/core
+-std=c11

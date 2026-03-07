@@ -1,7 +1,7 @@
 #ifndef CLEARUI_LAYOUT_H
 #define CLEARUI_LAYOUT_H
 
-#include "core/node.h"
+#include "../core/node.h"
 
 /**
  * Layout engine: single pass + flex-grow over node tree.

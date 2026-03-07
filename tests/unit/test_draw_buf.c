@@ -2,8 +2,8 @@
  * Unit test: draw buffer configurable capacity.
  * Uses internal headers to assert capacity after create.
  */
-#include "clearui.h"
-#include "core/context.h"
+#include "../../include/clearui.h"
+#include "../../src/core/context.h"
 #include <assert.h>
 #include <stdio.h>
 

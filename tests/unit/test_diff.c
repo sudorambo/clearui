@@ -3,9 +3,9 @@
  * Builds a small declared tree, runs cui_diff_run twice, asserts retained
  * is non-NULL and scroll state is copied from retained to declared.
  */
-#include "core/diff.h"
-#include "core/node.h"
-#include "core/arena.h"
+#include "../../src/core/diff.h"
+#include "../../src/core/node.h"
+#include "../../src/core/arena.h"
 #include <assert.h>
 #include <stdio.h>
 

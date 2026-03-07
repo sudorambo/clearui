@@ -2,9 +2,9 @@
  * Counter example: cui_state, cui_frame_printf, cui_button.
  * One frame with inject_click on "+" button; next frame count should be 1.
  */
-#include "clearui.h"
-#include "clearui_platform.h"
-#include "clearui_rdi.h"
+#include "../../include/clearui.h"
+#include "../../include/clearui_platform.h"
+#include "../../include/clearui_rdi.h"
 #include <assert.h>
 #include <stdio.h>
 

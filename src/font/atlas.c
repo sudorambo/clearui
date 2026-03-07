@@ -3,8 +3,8 @@
  * Uses vendored stb_truetype for metrics; optional HarfBuzz for complex scripts is a follow-up.
  */
 #define STB_TRUETYPE_IMPLEMENTATION
-#include "deps/stb_truetype.h"
-#include "font/atlas.h"
+#include "../../deps/stb_truetype.h"
+#include "atlas.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

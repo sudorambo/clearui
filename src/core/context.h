@@ -1,15 +1,14 @@
 #ifndef CLEARUI_CONTEXT_H
 #define CLEARUI_CONTEXT_H
 
-#include "clearui.h"
-#include "clearui_platform.h"
-#include "clearui_rdi.h"
-#include "core/arena.h"
-#include "core/frame_alloc.h"
-#include "core/vault.h"
-#include "core/draw_cmd.h"
-#include "core/node.h"
-#include "core/a11y.h"
+#include "../../include/clearui.h"
+#include "../../include/clearui_rdi.h"
+#include "arena.h"
+#include "frame_alloc.h"
+#include "vault.h"
+#include "draw_cmd.h"
+#include "node.h"
+#include "a11y.h"
 
 cui_ctx *cui_create(const cui_config *config);
 void     cui_destroy(cui_ctx *ctx);
