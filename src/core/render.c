@@ -7,8 +7,6 @@
 #include "clearui_rdi.h"
 #include <string.h>
 
-#define CUI_DRAW_BUF_MAX 1024
-
 static void scale_buf(const cui_draw_command_buffer *src, cui_draw_command_buffer *dst, float scale) {
 	if (!src || !dst || scale <= 0) return;
 	dst->count = 0;
