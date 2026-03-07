@@ -21,20 +21,20 @@ int main(void) {
 	cui_node *b = cui_node_alloc(&arena);
 	assert(a != NULL && b != NULL);
 	a->type = CUI_NODE_LABEL;
+	a->label_text = "Label A";
 	b->type = CUI_NODE_LABEL;
+	b->label_text = "Label B";
 	cui_node_append_child(root, a);
 	cui_node_append_child(root, b);
 
 	cui_layout_run(root, 400, 300);
 
 	/* Column: a then b; a at top, b below with gap; both centered in 400 */
-	assert(a->layout_x >= 150 && a->layout_x <= 160);
-	assert(a->layout_y >= 0 && a->layout_y <= 1);
-	assert(a->layout_w == 100 && a->layout_h == 20);
-
-	assert(b->layout_x >= 150 && b->layout_x <= 160);
-	assert(b->layout_y >= 28 && b->layout_y <= 30); /* 20 + gap 8 */
-	assert(b->layout_w == 100 && b->layout_h == 20);
+	assert(a->layout_w > 0 && a->layout_h > 0);
+	assert(b->layout_w > 0 && b->layout_h > 0);
+	assert(a->layout_x >= 100 && a->layout_x <= 200);
+	assert(a->layout_y >= 0 && a->layout_y <= 10);
+	assert(b->layout_y >= a->layout_y + a->layout_h);
 
 	/* Row: build row with two buttons, check horizontal layout */
 	cui_arena_reset(&arena);
@@ -84,6 +84,27 @@ int main(void) {
 		assert(ca->next_sibling == cb);
 		assert(cb->next_sibling == cc);
 		assert(cc->next_sibling == NULL);
+	}
+
+	/* Content-aware label sizing: two labels with different text get different layout_w */
+	cui_arena_reset(&arena);
+	{
+		cui_node *row = cui_node_alloc(&arena);
+		assert(row != NULL);
+		row->type = CUI_NODE_ROW;
+		row->layout_w = 400;
+		row->layout_h = 50;
+		cui_node *short_label = cui_node_alloc(&arena);
+		cui_node *long_label = cui_node_alloc(&arena);
+		assert(short_label != NULL && long_label != NULL);
+		short_label->type = CUI_NODE_LABEL;
+		short_label->label_text = "Short";
+		long_label->type = CUI_NODE_LABEL;
+		long_label->label_text = "Much longer text";
+		cui_node_append_child(row, short_label);
+		cui_node_append_child(row, long_label);
+		cui_layout_run(row, 400, 50);
+		assert(short_label->layout_w < long_label->layout_w && "content-aware sizing: longer text should have larger width");
 	}
 
 	cui_arena_free(&arena);

@@ -4,6 +4,8 @@
  */
 #include "layout.h"
 #include "core/node.h"
+#include "core/theme.h"
+#include "font/atlas.h"
 #include <string.h>
 
 #define ALIGN_START   0
@@ -14,13 +16,15 @@
 #define DEFAULT_GAP 8
 #define DEFAULT_LEAF_W 80
 #define DEFAULT_LEAF_H 24
-#define LABEL_W 100
-#define LABEL_H 20
 
 static float node_intrinsic_w(const cui_node *n) {
 	if (n->layout_w > 0) return n->layout_w;
 	switch (n->type) {
-		case CUI_NODE_LABEL: return LABEL_W;
+		case CUI_NODE_LABEL: {
+			float w = 0.f, h = 0.f;
+			cui_font_measure(cui_font_default_id(), CUI_THEME_DEFAULT_FONT_SIZE, n->label_text, &w, &h);
+			return w > 0.f ? w : 1.f;
+		}
 		case CUI_NODE_BUTTON: return DEFAULT_LEAF_W;
 		case CUI_NODE_CHECKBOX:
 		case CUI_NODE_ICON_BUTTON: return 24;
@@ -35,7 +39,11 @@ static float node_intrinsic_w(const cui_node *n) {
 static float node_intrinsic_h(const cui_node *n) {
 	if (n->layout_h > 0) return n->layout_h;
 	switch (n->type) {
-		case CUI_NODE_LABEL: return LABEL_H;
+		case CUI_NODE_LABEL: {
+			float w = 0.f, h = 0.f;
+			cui_font_measure(cui_font_default_id(), CUI_THEME_DEFAULT_FONT_SIZE, n->label_text, &w, &h);
+			return h > 0.f ? h : (float)CUI_THEME_DEFAULT_FONT_SIZE;
+		}
 		case CUI_NODE_BUTTON: return DEFAULT_LEAF_H;
 		case CUI_NODE_CHECKBOX:
 		case CUI_NODE_ICON_BUTTON: return 24;

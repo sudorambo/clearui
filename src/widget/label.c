@@ -11,10 +11,10 @@ void cui_label(cui_ctx *ctx, const char *text) {
 	if (!label) return;
 	label->type = CUI_NODE_LABEL;
 	label->label_text = text;
-	label->layout_x = 10;
-	label->layout_y = 10;
-	label->layout_w = 100;
-	label->layout_h = 20;
+	label->layout_x = 0;
+	label->layout_y = 0;
+	label->layout_w = 0;
+	label->layout_h = 0;
 	{
 		const cui_style *s = cui_ctx_current_style(ctx);
 		if (s) { label->text_color = s->text_color; label->text_decoration = s->text_decoration; }

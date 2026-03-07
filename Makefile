@@ -1,7 +1,7 @@
 # ClearUI - C11 build (plan.md: -std=c11 -Wall -Wextra -Wpedantic)
 CC     ?= cc
-CFLAGS := -std=c11 -Wall -Wextra -Wpedantic -Iinclude -Isrc
-LDFLAGS :=
+CFLAGS := -std=c11 -Wall -Wextra -Wpedantic -I. -Iinclude -Isrc
+LDFLAGS := -lm
 
 # Sources (expand as implementation grows)
 CORE_SRCS := src/core/arena.c src/core/frame_alloc.c src/core/vault.c src/core/context.c \
@@ -20,23 +20,25 @@ all: $(OBJS)
 
 # Unit tests (Phase 2)
 test_arena: tests/unit/test_arena.c src/core/arena.c
-	$(CC) $(CFLAGS) -o $@ tests/unit/test_arena.c src/core/arena.c
+	$(CC) $(CFLAGS) -o $@ tests/unit/test_arena.c src/core/arena.c $(LDFLAGS)
 test_vault: tests/unit/test_vault.c src/core/vault.c
-	$(CC) $(CFLAGS) -o $@ tests/unit/test_vault.c src/core/vault.c
-test_layout: tests/unit/test_layout.c src/core/arena.c src/core/node.c src/layout/layout.c
-	$(CC) $(CFLAGS) -o $@ tests/unit/test_layout.c src/core/arena.c src/core/node.c src/layout/layout.c
-unit-tests: test_arena test_vault test_layout
-	./test_arena && ./test_vault && ./test_layout
+	$(CC) $(CFLAGS) -o $@ tests/unit/test_vault.c src/core/vault.c $(LDFLAGS)
+test_layout: tests/unit/test_layout.c src/core/arena.c src/core/node.c src/layout/layout.c src/font/atlas.c
+	$(CC) $(CFLAGS) -o $@ tests/unit/test_layout.c src/core/arena.c src/core/node.c src/layout/layout.c src/font/atlas.c $(LDFLAGS)
+test_font: tests/unit/test_font.c src/font/atlas.c
+	$(CC) $(CFLAGS) -o $@ tests/unit/test_font.c src/font/atlas.c $(LDFLAGS)
+unit-tests: test_arena test_vault test_layout test_font
+	./test_arena && ./test_vault && ./test_layout && ./test_font
 
 # Integration test: Hello World pipeline (Phase 3)
 test_hello: $(OBJS) tests/integration/test_hello.c
-	$(CC) $(CFLAGS) -o $@ tests/integration/test_hello.c $(OBJS)
+	$(CC) $(CFLAGS) -o $@ tests/integration/test_hello.c $(OBJS) $(LDFLAGS)
 # Integration test: Counter (Phase 4)
 test_counter: $(OBJS) tests/integration/test_counter.c
-	$(CC) $(CFLAGS) -o $@ tests/integration/test_counter.c $(OBJS)
+	$(CC) $(CFLAGS) -o $@ tests/integration/test_counter.c $(OBJS) $(LDFLAGS)
 # Integration test: RDI + platform (Phase 9)
 test_rdi_platform: $(OBJS) tests/integration/test_rdi_platform.c
-	$(CC) $(CFLAGS) -o $@ tests/integration/test_rdi_platform.c $(OBJS)
+	$(CC) $(CFLAGS) -o $@ tests/integration/test_rdi_platform.c $(OBJS) $(LDFLAGS)
 integration-tests: test_hello test_counter test_rdi_platform
 	./test_hello && ./test_counter && ./test_rdi_platform
 
@@ -44,6 +46,6 @@ integration-tests: test_hello test_counter test_rdi_platform
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -f $(OBJS) build/*.o build/*.a hello counter test_arena test_vault test_layout test_hello test_counter test_rdi_platform 2>/dev/null; true
+	rm -f $(OBJS) build/*.o build/*.a hello counter test_arena test_vault test_layout test_font test_hello test_counter test_rdi_platform 2>/dev/null; true
 
 .PHONY: all clean unit-tests integration-tests
