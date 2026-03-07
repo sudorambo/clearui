@@ -35,6 +35,7 @@ typedef struct cui_node cui_node;
 struct cui_node {
 	enum cui_node_type type;
 	cui_node          *first_child;
+	cui_node          *last_child;
 	cui_node          *next_sibling;
 	const char       *label_text;
 	const char       *button_id;

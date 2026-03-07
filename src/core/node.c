@@ -18,9 +18,8 @@ void cui_node_append_child(cui_node *parent, cui_node *child) {
 	child->next_sibling = NULL;
 	if (!parent->first_child) {
 		parent->first_child = child;
-		return;
+	} else {
+		parent->last_child->next_sibling = child;
 	}
-	cui_node *p = parent->first_child;
-	while (p->next_sibling) p = p->next_sibling;
-	p->next_sibling = child;
+	parent->last_child = child;
 }

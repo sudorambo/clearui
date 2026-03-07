@@ -56,6 +56,36 @@ int main(void) {
 	assert(b2->layout_x >= 92 && b2->layout_x <= 95); /* 80 + gap 12 */
 	assert(b2->layout_y == b1->layout_y);
 
+	/* T003: last_child invariants */
+	cui_arena_reset(&arena);
+	{
+		cui_node *p = cui_node_alloc(&arena);
+		assert(p != NULL);
+		p->type = CUI_NODE_COLUMN;
+
+		cui_node *ca = cui_node_alloc(&arena);
+		ca->type = CUI_NODE_LABEL;
+		cui_node_append_child(p, ca);
+		assert(p->first_child == ca);
+		assert(p->last_child == ca);
+
+		cui_node *cb = cui_node_alloc(&arena);
+		cb->type = CUI_NODE_LABEL;
+		cui_node_append_child(p, cb);
+		assert(p->first_child == ca);
+		assert(p->last_child == cb);
+		assert(ca->next_sibling == cb);
+
+		cui_node *cc = cui_node_alloc(&arena);
+		cc->type = CUI_NODE_LABEL;
+		cui_node_append_child(p, cc);
+		assert(p->first_child == ca);
+		assert(p->last_child == cc);
+		assert(ca->next_sibling == cb);
+		assert(cb->next_sibling == cc);
+		assert(cc->next_sibling == NULL);
+	}
+
 	cui_arena_free(&arena);
 	printf("test_layout: PASS\n");
 	return 0;
