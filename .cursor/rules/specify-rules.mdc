@@ -14,6 +14,7 @@ Auto-generated from all feature plans. Last updated: 2026-03-07
 - N/A (font data can be embedded or loaded once at init) (007-font-atlas)
 - C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (stdlib malloc/free for dynamic buffer; optional static allocation path) (009-dynamic-draw-buffer)
 - Draw command buffers owned by `cui_ctx`; allocated at create, freed at destroy (009-dynamic-draw-buffer)
+- Draw buffers owned by `cui_ctx`; scaled_buf is one of them (010-move-scaled-buf-to-context)
 
 - C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (zero external dependencies) (002-fix-gitignore)
 
@@ -33,9 +34,9 @@ tests/
 C11 (`-std=c11 -Wall -Wextra -Wpedantic`): Follow standard conventions
 
 ## Recent Changes
+- 010-move-scaled-buf-to-context: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None
 - 009-dynamic-draw-buffer: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (stdlib malloc/free for dynamic buffer; optional static allocation path)
 - 008-min-max-constraint-clamping: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None
-- 007-font-atlas: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None for default build; font metrics via vendored single-file C (e.g. stb_truetype)
 
 
 <!-- MANUAL ADDITIONS START -->
