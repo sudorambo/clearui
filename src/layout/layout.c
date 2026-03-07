@@ -60,6 +60,19 @@ static float get_gap(const cui_node *n) {
 	return g > 0 ? g : DEFAULT_GAP;
 }
 
+/* Clamp layout_w/layout_h to min/max from layout_opts; 0 means no constraint. */
+static void clamp_node_size(cui_node *n) {
+	if (!n) return;
+	if (n->layout_opts.min_width > 0 && n->layout_w < n->layout_opts.min_width)
+		n->layout_w = n->layout_opts.min_width;
+	if (n->layout_opts.max_width > 0 && n->layout_w > n->layout_opts.max_width)
+		n->layout_w = n->layout_opts.max_width;
+	if (n->layout_opts.min_height > 0 && n->layout_h < n->layout_opts.min_height)
+		n->layout_h = n->layout_opts.min_height;
+	if (n->layout_opts.max_height > 0 && n->layout_h > n->layout_opts.max_height)
+		n->layout_h = n->layout_opts.max_height;
+}
+
 static void layout_leaf(cui_node *n, float x, float y) {
 	n->layout_x = x;
 	n->layout_y = y;
@@ -129,6 +142,7 @@ static void measure(cui_node *n) {
 		if (n->layout_h <= 0) n->layout_h = node_intrinsic_h(n);
 		break;
 	}
+	clamp_node_size(n);
 }
 
 static void run_layout(cui_node *n, float x, float y, float w, float h) {
@@ -144,6 +158,7 @@ static void run_layout(cui_node *n, float x, float y, float w, float h) {
 	n->layout_y = y;
 	n->layout_w = w;
 	n->layout_h = h;
+	clamp_node_size(n);
 
 	switch (n->type) {
 	case CUI_NODE_CENTER:
@@ -176,6 +191,7 @@ static void run_layout(cui_node *n, float x, float y, float w, float h) {
 			c->layout_y = y + cy;
 			c->layout_w = cw;
 			c->layout_h = ch;
+			clamp_node_size(c);
 			run_layout(c, x + cx, y + cy, cw, ch);
 			cy += ch + gap;
 		}
@@ -192,6 +208,7 @@ static void run_layout(cui_node *n, float x, float y, float w, float h) {
 			c->layout_y = y + pad_y;
 			c->layout_w = cw;
 			c->layout_h = ch;
+			clamp_node_size(c);
 			run_layout(c, x + cx, y + pad_y, cw, ch);
 			cx += cw + gap;
 		}
@@ -202,6 +219,7 @@ static void run_layout(cui_node *n, float x, float y, float w, float h) {
 				c->layout_y = y + pad_y + inner_h - c->layout_h;
 			else if (n->layout_opts.align_y == ALIGN_STRETCH && inner_h > 0)
 				c->layout_h = inner_h;
+			clamp_node_size(c);
 		}
 		break;
 	}
@@ -219,6 +237,7 @@ static void run_layout(cui_node *n, float x, float y, float w, float h) {
 			c->layout_y = sy;
 			c->layout_w = max_w;
 			c->layout_h = max_h;
+			clamp_node_size(c);
 			run_layout(c, sx, sy, max_w, max_h);
 		}
 		break;
@@ -241,6 +260,7 @@ static void run_layout(cui_node *n, float x, float y, float w, float h) {
 			c->layout_y = y + cy;
 			c->layout_w = cw;
 			c->layout_h = ch;
+			clamp_node_size(c);
 			run_layout(c, x + cx, y + cy, cw, ch);
 			cx += cw + gap;
 			if (ch > line_h) line_h = ch;
@@ -250,9 +270,11 @@ static void run_layout(cui_node *n, float x, float y, float w, float h) {
 	case CUI_NODE_LABEL:
 	case CUI_NODE_BUTTON:
 		layout_leaf(n, x, y);
+		clamp_node_size(n);
 		break;
 	default:
 		layout_leaf(n, x, y);
+		clamp_node_size(n);
 		for (cui_node *c = n->first_child; c; c = c->next_sibling)
 			run_layout(c, c->layout_x, c->layout_y, c->layout_w, c->layout_h);
 		break;

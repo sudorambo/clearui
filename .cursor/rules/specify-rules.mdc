@@ -31,9 +31,9 @@ tests/
 C11 (`-std=c11 -Wall -Wextra -Wpedantic`): Follow standard conventions
 
 ## Recent Changes
+- 008-min-max-constraint-clamping: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None
 - 007-font-atlas: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None for default build; font metrics via vendored single-file C (e.g. stb_truetype)
 - 006-refactor-cui-center: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (standard C library only)
-- 005-node-last-child: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (standard C library only)
 
 
 <!-- MANUAL ADDITIONS START -->

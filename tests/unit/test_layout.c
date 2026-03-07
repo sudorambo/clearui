@@ -107,6 +107,41 @@ int main(void) {
 		assert(short_label->layout_w < long_label->layout_w && "content-aware sizing: longer text should have larger width");
 	}
 
+	/* Min/max constraint clamping: max_width clamps row, min_height clamps column */
+	cui_arena_reset(&arena);
+	{
+		cui_node *row = cui_node_alloc(&arena);
+		assert(row != NULL);
+		row->type = CUI_NODE_ROW;
+		row->layout_opts.gap = 8;
+		row->layout_opts.max_width = 100.f; /* row would be 80+8+80=168 without clamp */
+		cui_node *b1 = cui_node_alloc(&arena);
+		cui_node *b2 = cui_node_alloc(&arena);
+		b1->type = CUI_NODE_BUTTON;
+		b2->type = CUI_NODE_BUTTON;
+		cui_node_append_child(row, b1);
+		cui_node_append_child(row, b2);
+		cui_layout_run(row, 400, 50);
+		assert(row->layout_w == 100.f && "max_width 100 should clamp row width");
+	}
+	{
+		cui_node *root = cui_node_alloc(&arena);
+		root->type = CUI_NODE_CENTER;
+		root->layout_w = 200;
+		root->layout_h = 100;
+		cui_node *col = cui_node_alloc(&arena);
+		assert(col != NULL);
+		col->type = CUI_NODE_COLUMN;
+		col->layout_opts.min_height = 40.f; /* column with one small label would be < 40 */
+		cui_node *lab = cui_node_alloc(&arena);
+		lab->type = CUI_NODE_LABEL;
+		lab->label_text = "Hi";
+		cui_node_append_child(col, lab);
+		cui_node_append_child(root, col);
+		cui_layout_run(root, 200, 100);
+		assert(col->layout_h >= 39.f && col->layout_h <= 41.f && "min_height 40 should clamp column height");
+	}
+
 	cui_arena_free(&arena);
 	printf("test_layout: PASS\n");
 	return 0;
