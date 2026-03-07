@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-enum cui_node_type {
+typedef enum cui_node_type {
 	CUI_NODE_NONE,
 	CUI_NODE_LABEL,
 	CUI_NODE_BUTTON,
@@ -19,7 +19,7 @@ enum cui_node_type {
 	CUI_NODE_STACK,
 	CUI_NODE_WRAP,
 	CUI_NODE_COUNT
-};
+} cui_node_type;
 
 /* Internal layout options (mirrors public cui_layout for container nodes). */
 typedef struct cui_node_layout {
@@ -33,7 +33,7 @@ typedef struct cui_node_layout {
 typedef struct cui_node cui_node;
 
 struct cui_node {
-	enum cui_node_type type;
+	cui_node_type type;
 	cui_node          *first_child;
 	cui_node          *last_child;
 	cui_node          *next_sibling;

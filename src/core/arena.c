@@ -51,6 +51,7 @@ void *cui_arena_alloc(cui_arena *a, size_t size) {
 
 void *cui_arena_alloc_aligned(cui_arena *a, size_t size, size_t align) {
 	if (size == 0) return NULL;
+	if (align == 0 || (align & (align - 1)) != 0) return NULL;
 	uintptr_t cur = (uintptr_t)(a->base + a->pos);
 	size_t pad = (align - (cur % align)) % align;
 	size_t total = pad + size;

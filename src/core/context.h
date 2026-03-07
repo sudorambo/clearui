@@ -17,16 +17,16 @@ void cui_begin_frame(cui_ctx *ctx);
 void cui_end_frame(cui_ctx *ctx);
 int  cui_running(cui_ctx *ctx);
 
-void cui_set_platform(cui_ctx *ctx, const void *platform, void *platform_ctx);
-void cui_set_rdi(cui_ctx *ctx, const void *rdi, void *rdi_ctx);
+void cui_set_platform(cui_ctx *ctx, const cui_platform *platform, cui_platform_ctx *platform_ctx);
+void cui_set_rdi(cui_ctx *ctx, const cui_rdi *rdi, cui_rdi_context *rdi_ctx);
 
 cui_arena       *cui_ctx_arena(cui_ctx *ctx);
 cui_frame_allocator *cui_ctx_frame(cui_ctx *ctx);
 cui_vault       *cui_ctx_vault(cui_ctx *ctx);
 cui_draw_command_buffer *cui_ctx_draw_buf(cui_ctx *ctx);
 const cui_config *cui_ctx_config(cui_ctx *ctx);
-const void      *cui_ctx_rdi(cui_ctx *ctx);
-void            *cui_ctx_rdi_ctx(cui_ctx *ctx);
+const cui_rdi   *cui_ctx_rdi(cui_ctx *ctx);
+cui_rdi_context *cui_ctx_rdi_ctx(cui_ctx *ctx);
 cui_node       **cui_ctx_root_ptr(cui_ctx *ctx);
 cui_node        *cui_ctx_current_parent(cui_ctx *ctx);
 void             cui_ctx_push_parent(cui_ctx *ctx, cui_node *n);

@@ -21,8 +21,8 @@ typedef enum cui_a11y_role {
 typedef struct cui_a11y_entry {
 	cui_a11y_role role;
 	const char   *label;   /* from aria_label, label_text, or button_id */
-	const char   *state;   /* e.g. "checked", "focused", "" */
-	float        x, y, w, h;
+	char          state[32]; /* composable: "checked focused", "checked", "focused", "" */
+	float         x, y, w, h;
 } cui_a11y_entry;
 
 #define CUI_A11Y_MAX 128

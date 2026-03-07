@@ -29,7 +29,7 @@ void cui_draw_rect(cui_ctx *ctx, float x, float y, float w, float h, unsigned in
 
 void cui_draw_circle(cui_ctx *ctx, float cx, float cy, float r, unsigned int color) {
 	if (!ctx) return;
-	cui_draw_buf_push_rect(cui_ctx_current_draw_buf(ctx), cx - r, cy - r, 2*r, 2*r, color);
+	cui_draw_buf_push_rounded_rect(cui_ctx_current_draw_buf(ctx), cx - r, cy - r, 2*r, 2*r, r, color);
 }
 
 void cui_draw_text(cui_ctx *ctx, float x, float y, const char *text, unsigned int color) {

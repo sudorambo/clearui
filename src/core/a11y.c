@@ -6,6 +6,7 @@
 #include "context.h"
 #include "node.h"
 #include <string.h>
+#include <stdio.h>
 
 static cui_a11y_role node_to_role(const cui_node *n) {
 	switch (n->type) {
@@ -36,11 +37,15 @@ static void visit(cui_node *n, cui_a11y_tree *out, const char *focused_id) {
 		cui_a11y_entry *e = &out->entry[out->count++];
 		e->role = role;
 		e->label = node_label(n);
-		e->state = "";
-		if (n->type == CUI_NODE_CHECKBOX && n->checkbox_checked && *n->checkbox_checked)
-			e->state = "checked";
-		if (n->button_id && focused_id && strcmp(n->button_id, focused_id) == 0)
-			e->state = "focused";
+		e->state[0] = '\0';
+		int is_checked = n->type == CUI_NODE_CHECKBOX && n->checkbox_checked && *n->checkbox_checked;
+		int is_focused = n->button_id && focused_id && strcmp(n->button_id, focused_id) == 0;
+		if (is_checked && is_focused)
+			snprintf(e->state, sizeof(e->state), "checked focused");
+		else if (is_checked)
+			snprintf(e->state, sizeof(e->state), "checked");
+		else if (is_focused)
+			snprintf(e->state, sizeof(e->state), "focused");
 		e->x = n->layout_x;
 		e->y = n->layout_y;
 		e->w = n->layout_w;

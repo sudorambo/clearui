@@ -16,6 +16,7 @@ Auto-generated from all feature plans. Last updated: 2026-03-07
 - Draw command buffers owned by `cui_ctx`; allocated at create, freed at destroy (009-dynamic-draw-buffer)
 - Draw buffers owned by `cui_ctx`; scaled_buf is one of them (010-move-scaled-buf-to-context)
 - Declared tree in frame arena (reset each frame). Retained tree in context-owned storage (heap or persistent arena); diff allocates/frees retained nodes. (011-diff-engine)
+- C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (vendored `stb_truetype.h` for font metrics) (012-review-fixes)
 
 - C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (zero external dependencies) (002-fix-gitignore)
 
@@ -35,9 +36,9 @@ tests/
 C11 (`-std=c11 -Wall -Wextra -Wpedantic`): Follow standard conventions
 
 ## Recent Changes
+- 012-review-fixes: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (vendored `stb_truetype.h` for font metrics)
 - 011-diff-engine: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None
 - 010-move-scaled-buf-to-context: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None
-- 009-dynamic-draw-buffer: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (stdlib malloc/free for dynamic buffer; optional static allocation path)
 
 
 <!-- MANUAL ADDITIONS START -->

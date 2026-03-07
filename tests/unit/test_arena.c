@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <string.h>
+#include <stdio.h>
 
 #define ASSERT_ALIGNED(ptr) \
 	assert(((uintptr_t)(ptr) % _Alignof(max_align_t)) == 0)
@@ -55,6 +55,16 @@ int main(void) {
 	assert(c2 != NULL);
 	assert(((uintptr_t)c2 % 64) == 0);
 
+	/* T024: alignment validation — reject invalid alignments */
+	cui_arena_reset(&a);
+	assert(cui_arena_alloc_aligned(&a, 64, 0) == NULL);
+	assert(cui_arena_alloc_aligned(&a, 64, 3) == NULL);
+	assert(cui_arena_alloc_aligned(&a, 64, 5) == NULL);
+	assert(cui_arena_alloc_aligned(&a, 64, 1) != NULL);
+	assert(cui_arena_alloc_aligned(&a, 64, 2) != NULL);
+	assert(cui_arena_alloc_aligned(&a, 64, 64) != NULL);
+
 	cui_arena_free(&a);
+	printf("test_arena: PASS\n");
 	return 0;
 }

@@ -1,5 +1,6 @@
 # ClearUI - C11 build (plan.md: -std=c11 -Wall -Wextra -Wpedantic)
 CC     ?= cc
+AR     ?= ar
 CFLAGS := -std=c11 -Wall -Wextra -Wpedantic -I. -Iinclude -Isrc -Isrc/core
 LDFLAGS := -lm
 
@@ -15,10 +16,18 @@ PLAT_SRCS  := src/platform/cui_platform_stub.c
 SRCS       := $(CORE_SRCS) $(FONT_SRCS) $(LAYOUT_SRCS) $(WIDGET_SRCS) $(RDI_SRCS) $(PLAT_SRCS)
 OBJS       := $(SRCS:.c=.o)
 
+LIB_SRCS   := $(CORE_SRCS) $(FONT_SRCS) $(LAYOUT_SRCS) $(WIDGET_SRCS)
+LIB_OBJS   := $(LIB_SRCS:.c=.o)
+
 # Default: build all objects
 all: $(OBJS)
 
-# Unit tests (Phase 2)
+# Static library (core + font + layout + widgets; excludes platform/RDI stubs)
+lib: libclearui.a
+libclearui.a: $(LIB_OBJS)
+	$(AR) rcs $@ $(LIB_OBJS)
+
+# Unit tests
 test_arena: tests/unit/test_arena.c src/core/arena.c
 	$(CC) $(CFLAGS) -o $@ tests/unit/test_arena.c src/core/arena.c $(LDFLAGS)
 test_vault: tests/unit/test_vault.c src/core/vault.c
@@ -31,16 +40,22 @@ test_draw_buf: $(OBJS) tests/unit/test_draw_buf.c
 	$(CC) $(CFLAGS) -o $@ tests/unit/test_draw_buf.c $(OBJS) $(LDFLAGS)
 test_diff: tests/unit/test_diff.c src/core/arena.o src/core/node.o src/core/diff.o
 	$(CC) $(CFLAGS) -o $@ tests/unit/test_diff.c src/core/arena.o src/core/node.o src/core/diff.o $(LDFLAGS)
-unit-tests: test_arena test_vault test_layout test_font test_draw_buf test_diff
-	./test_arena && ./test_vault && ./test_layout && ./test_font && ./test_draw_buf && ./test_diff
+test_frame_alloc: tests/unit/test_frame_alloc.c src/core/frame_alloc.c
+	$(CC) $(CFLAGS) -o $@ tests/unit/test_frame_alloc.c src/core/frame_alloc.c $(LDFLAGS)
+test_draw_cmd: $(OBJS) tests/unit/test_draw_cmd.c
+	$(CC) $(CFLAGS) -o $@ tests/unit/test_draw_cmd.c $(OBJS) $(LDFLAGS)
+test_a11y: $(OBJS) tests/unit/test_a11y.c
+	$(CC) $(CFLAGS) -o $@ tests/unit/test_a11y.c $(OBJS) $(LDFLAGS)
+test_focus: $(OBJS) tests/unit/test_focus.c
+	$(CC) $(CFLAGS) -o $@ tests/unit/test_focus.c $(OBJS) $(LDFLAGS)
+unit-tests: test_arena test_vault test_layout test_font test_draw_buf test_diff test_frame_alloc test_draw_cmd test_a11y test_focus
+	./test_arena && ./test_vault && ./test_layout && ./test_font && ./test_draw_buf && ./test_diff && ./test_frame_alloc && ./test_draw_cmd && ./test_a11y && ./test_focus
 
-# Integration test: Hello World pipeline (Phase 3)
+# Integration tests
 test_hello: $(OBJS) tests/integration/test_hello.c
 	$(CC) $(CFLAGS) -o $@ tests/integration/test_hello.c $(OBJS) $(LDFLAGS)
-# Integration test: Counter (Phase 4)
 test_counter: $(OBJS) tests/integration/test_counter.c
 	$(CC) $(CFLAGS) -o $@ tests/integration/test_counter.c $(OBJS) $(LDFLAGS)
-# Integration test: RDI + platform (Phase 9)
 test_rdi_platform: $(OBJS) tests/integration/test_rdi_platform.c
 	$(CC) $(CFLAGS) -o $@ tests/integration/test_rdi_platform.c $(OBJS) $(LDFLAGS)
 integration-tests: test_hello test_counter test_rdi_platform
@@ -50,6 +65,9 @@ integration-tests: test_hello test_counter test_rdi_platform
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -f $(OBJS) build/*.o build/*.a hello counter test_arena test_vault test_layout test_font test_draw_buf test_diff test_hello test_counter test_rdi_platform 2>/dev/null; true
+	rm -f $(OBJS) build/*.o build/*.a libclearui.a hello counter \
+		test_arena test_vault test_layout test_font test_draw_buf test_diff \
+		test_frame_alloc test_draw_cmd test_a11y test_focus \
+		test_hello test_counter test_rdi_platform 2>/dev/null; true
 
-.PHONY: all clean unit-tests integration-tests
+.PHONY: all lib clean unit-tests integration-tests

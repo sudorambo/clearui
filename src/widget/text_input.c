@@ -4,7 +4,6 @@
 #include <string.h>
 
 int cui_text_input(cui_ctx *ctx, const char *id, char *buffer, size_t capacity, const cui_text_input_opts *opts) {
-	(void)opts;
 	if (!ctx || !id || !buffer || capacity == 0) return 0;
 	cui_node *parent = cui_ctx_current_parent(ctx);
 	cui_node **root = cui_ctx_root_ptr(ctx);
@@ -17,6 +16,8 @@ int cui_text_input(cui_ctx *ctx, const char *id, char *buffer, size_t capacity, 
 	if (n->tab_index < 0) n->tab_index = -1;
 	n->text_input_buf = buffer;
 	n->text_input_cap = capacity;
+	if (opts && opts->placeholder)
+		n->label_text = opts->placeholder;
 	n->layout_w = 120;
 	n->layout_h = 24;
 	if (parent)

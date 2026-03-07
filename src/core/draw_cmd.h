@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-enum cui_cmd_type {
+typedef enum cui_cmd_type {
 	CUI_CMD_NOP,
 	CUI_CMD_RECT,
 	CUI_CMD_ROUNDED_RECT,
@@ -11,7 +11,7 @@ enum cui_cmd_type {
 	CUI_CMD_TEXT,
 	CUI_CMD_SCISSOR,
 	CUI_CMD_COUNT
-};
+} cui_cmd_type;
 
 typedef struct { float x, y, w, h; } cui_rect;
 typedef struct { float x, y, w, h; unsigned int color; } cui_cmd_fill_rect;
@@ -36,7 +36,7 @@ typedef struct {
 } cui_cmd_text;
 
 typedef struct {
-	enum cui_cmd_type type;
+	cui_cmd_type type;
 	union {
 		cui_rect rect;
 		cui_cmd_fill_rect fill_rect;
@@ -46,8 +46,6 @@ typedef struct {
 		cui_rect scissor;
 	} u;
 } cui_draw_cmd;
-
-#define CUI_DRAW_BUF_MAX 1024
 
 typedef struct cui_draw_command_buffer {
 	cui_draw_cmd *cmd;
@@ -61,6 +59,8 @@ void cui_draw_buf_clear(cui_draw_command_buffer *buf);
 int  cui_draw_buf_push_rect(cui_draw_command_buffer *buf, float x, float y, float w, float h, unsigned int color);
 int  cui_draw_buf_push_line(cui_draw_command_buffer *buf, float x0, float y0, float x1, float y1, float thickness, unsigned int color);
 int  cui_draw_buf_push_text(cui_draw_command_buffer *buf, float x, float y, const char *text, unsigned int color);
+int  cui_draw_buf_push_rounded_rect(cui_draw_command_buffer *buf, float x, float y, float w, float h, float r, unsigned int color);
+int  cui_draw_buf_push_scissor(cui_draw_command_buffer *buf, float x, float y, float w, float h);
 
 struct cui_node;
 struct cui_ctx;

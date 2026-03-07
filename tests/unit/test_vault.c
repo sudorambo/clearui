@@ -1,6 +1,7 @@
 #include "../../src/core/vault.h"
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
 
 int main(void) {
 	cui_vault *v = cui_vault_create(0);
@@ -24,5 +25,6 @@ int main(void) {
 	assert(strcmp(str2, "hello") == 0);
 
 	cui_vault_destroy(v);
+	printf("test_vault: PASS\n");
 	return 0;
 }

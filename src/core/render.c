@@ -59,8 +59,8 @@ static void scale_buf(const cui_draw_command_buffer *src, cui_draw_command_buffe
 }
 
 void cui_render_submit(cui_ctx *ctx) {
-	const cui_rdi *rdi = (const cui_rdi *)cui_ctx_rdi(ctx);
-	void *rdi_ctx = cui_ctx_rdi_ctx(ctx);
+	const cui_rdi *rdi = cui_ctx_rdi(ctx);
+	cui_rdi_context *rdi_ctx = cui_ctx_rdi_ctx(ctx);
 	if (!ctx || !rdi) return;
 	const cui_config *config = cui_ctx_config(ctx);
 	float scale = config && config->scale_factor > 0 ? config->scale_factor : 1.f;

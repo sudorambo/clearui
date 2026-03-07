@@ -15,6 +15,10 @@ extern "C" {
 #endif
 
 typedef struct cui_ctx cui_ctx;
+typedef struct cui_platform cui_platform;
+typedef struct cui_platform_ctx cui_platform_ctx;
+typedef struct cui_rdi cui_rdi;
+typedef struct cui_rdi_context cui_rdi_context;
 
 typedef struct cui_config {
 	const char *title;
@@ -51,8 +55,8 @@ typedef struct cui_style {
 cui_ctx *cui_create(const cui_config *config);
 void     cui_destroy(cui_ctx *ctx);
 
-void cui_set_platform(cui_ctx *ctx, const void *platform, void *platform_ctx);
-void cui_set_rdi(cui_ctx *ctx, const void *rdi, void *rdi_ctx);
+void cui_set_platform(cui_ctx *ctx, const cui_platform *platform, cui_platform_ctx *platform_ctx);
+void cui_set_rdi(cui_ctx *ctx, const cui_rdi *rdi, cui_rdi_context *rdi_ctx);
 
 int  cui_running(cui_ctx *ctx);
 void cui_begin_frame(cui_ctx *ctx);
@@ -75,7 +79,7 @@ void cui_column(cui_ctx *ctx, const cui_layout *opts);
 void cui_stack(cui_ctx *ctx, const cui_layout *opts);
 void cui_wrap(cui_ctx *ctx, const cui_layout *opts);
 typedef struct cui_scroll_opts { float max_height; } cui_scroll_opts;
-typedef struct cui_text_input_opts { int placeholder; } cui_text_input_opts;
+typedef struct cui_text_input_opts { const char *placeholder; } cui_text_input_opts;
 
 void cui_scroll(cui_ctx *ctx, const cui_scroll_opts *opts);
 void cui_end(cui_ctx *ctx);

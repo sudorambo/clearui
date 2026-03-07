@@ -44,6 +44,12 @@ static void replay_canvas_buf(cui_draw_command_buffer *dst, const cui_draw_comma
 		case CUI_CMD_LINE:
 			cui_draw_buf_push_line(dst, c->u.line.a.x + ox, c->u.line.a.y + oy, c->u.line.b.x + ox, c->u.line.b.y + oy, c->u.line.thickness, c->u.line.color);
 			break;
+		case CUI_CMD_ROUNDED_RECT:
+			cui_draw_buf_push_rounded_rect(dst, c->u.rounded_rect.x + ox, c->u.rounded_rect.y + oy, c->u.rounded_rect.w, c->u.rounded_rect.h, c->u.rounded_rect.r, c->u.rounded_rect.color);
+			break;
+		case CUI_CMD_SCISSOR:
+			cui_draw_buf_push_scissor(dst, c->u.scissor.x + ox, c->u.scissor.y + oy, c->u.scissor.w, c->u.scissor.h);
+			break;
 		default:
 			break;
 		}
@@ -146,6 +152,30 @@ int cui_draw_buf_push_text(cui_draw_command_buffer *buf, float x, float y, const
 	buf->cmd[buf->count].u.text.y = y;
 	buf->cmd[buf->count].u.text.text = text;
 	buf->cmd[buf->count].u.text.color = color;
+	buf->count++;
+	return 0;
+}
+
+int cui_draw_buf_push_rounded_rect(cui_draw_command_buffer *buf, float x, float y, float w, float h, float r, unsigned int color) {
+	if (!buf || !buf->cmd || buf->count >= buf->capacity) return -1;
+	buf->cmd[buf->count].type = CUI_CMD_ROUNDED_RECT;
+	buf->cmd[buf->count].u.rounded_rect.x = x;
+	buf->cmd[buf->count].u.rounded_rect.y = y;
+	buf->cmd[buf->count].u.rounded_rect.w = w;
+	buf->cmd[buf->count].u.rounded_rect.h = h;
+	buf->cmd[buf->count].u.rounded_rect.r = r;
+	buf->cmd[buf->count].u.rounded_rect.color = color;
+	buf->count++;
+	return 0;
+}
+
+int cui_draw_buf_push_scissor(cui_draw_command_buffer *buf, float x, float y, float w, float h) {
+	if (!buf || !buf->cmd || buf->count >= buf->capacity) return -1;
+	buf->cmd[buf->count].type = CUI_CMD_SCISSOR;
+	buf->cmd[buf->count].u.scissor.x = x;
+	buf->cmd[buf->count].u.scissor.y = y;
+	buf->cmd[buf->count].u.scissor.w = w;
+	buf->cmd[buf->count].u.scissor.h = h;
 	buf->count++;
 	return 0;
 }

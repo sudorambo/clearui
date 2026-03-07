@@ -27,8 +27,8 @@ struct cui_ctx {
 	cui_config       config;
 	const cui_platform *platform;
 	const cui_rdi    *rdi;
-	void            *platform_ctx;
-	void            *rdi_ctx;
+	cui_platform_ctx *platform_ctx;
+	cui_rdi_context  *rdi_ctx;
 	cui_draw_command_buffer draw_buf;
 	cui_draw_command_buffer canvas_cmd_buf;
 	cui_draw_command_buffer scaled_buf;
@@ -161,7 +161,7 @@ void cui_begin_frame(cui_ctx *ctx) {
 
 static void hit_test_visit(cui_ctx *ctx, cui_node *n) {
 	if (!ctx || !n) return;
-	if ((n->type == CUI_NODE_BUTTON || n->type == CUI_NODE_CHECKBOX || n->type == CUI_NODE_ICON_BUTTON) && n->button_id &&
+	if ((n->type == CUI_NODE_BUTTON || n->type == CUI_NODE_CHECKBOX || n->type == CUI_NODE_ICON_BUTTON || n->type == CUI_NODE_TEXT_INPUT) && n->button_id &&
 	    (float)ctx->last_click_x >= n->layout_x && (float)ctx->last_click_x < n->layout_x + n->layout_w &&
 	    (float)ctx->last_click_y >= n->layout_y && (float)ctx->last_click_y < n->layout_y + n->layout_h) {
 		size_t len = strlen(n->button_id);
@@ -245,12 +245,12 @@ void cui_destroy(cui_ctx *ctx) {
 	free(ctx);
 }
 
-void cui_set_platform(cui_ctx *ctx, const void *platform, void *platform_ctx) {
-	if (ctx) { ctx->platform = (const cui_platform *)platform; ctx->platform_ctx = platform_ctx; }
+void cui_set_platform(cui_ctx *ctx, const cui_platform *platform, cui_platform_ctx *platform_ctx) {
+	if (ctx) { ctx->platform = platform; ctx->platform_ctx = platform_ctx; }
 }
 
-void cui_set_rdi(cui_ctx *ctx, const void *rdi, void *rdi_ctx) {
-	if (ctx) { ctx->rdi = (const cui_rdi *)rdi; ctx->rdi_ctx = rdi_ctx; }
+void cui_set_rdi(cui_ctx *ctx, const cui_rdi *rdi, cui_rdi_context *rdi_ctx) {
+	if (ctx) { ctx->rdi = rdi; ctx->rdi_ctx = rdi_ctx; }
 }
 
 cui_arena *cui_ctx_arena(cui_ctx *ctx) { return ctx ? &ctx->arena : NULL; }
@@ -258,8 +258,8 @@ cui_frame_allocator *cui_ctx_frame(cui_ctx *ctx) { return ctx ? &ctx->frame : NU
 cui_vault *cui_ctx_vault(cui_ctx *ctx) { return ctx ? ctx->vault : NULL; }
 cui_draw_command_buffer *cui_ctx_draw_buf(cui_ctx *ctx) { return ctx ? &ctx->draw_buf : NULL; }
 const cui_config *cui_ctx_config(cui_ctx *ctx) { return ctx ? &ctx->config : NULL; }
-const void *cui_ctx_rdi(cui_ctx *ctx) { return ctx ? (const void *)ctx->rdi : NULL; }
-void *cui_ctx_rdi_ctx(cui_ctx *ctx) { return ctx ? ctx->rdi_ctx : NULL; }
+const cui_rdi *cui_ctx_rdi(cui_ctx *ctx) { return ctx ? ctx->rdi : NULL; }
+cui_rdi_context *cui_ctx_rdi_ctx(cui_ctx *ctx) { return ctx ? ctx->rdi_ctx : NULL; }
 cui_node **cui_ctx_root_ptr(cui_ctx *ctx) { return ctx ? &ctx->declared_root : NULL; }
 cui_node *cui_ctx_current_parent(cui_ctx *ctx) {
 	return (ctx && ctx->parent_top > 0) ? ctx->parent_stack[ctx->parent_top - 1] : NULL;

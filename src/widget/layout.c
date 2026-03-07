@@ -18,7 +18,7 @@ static void copy_layout_opts(cui_node_layout *dst, const cui_layout *src) {
 	dst->align_y = src->align_y;
 }
 
-static cui_node *push_container(cui_ctx *ctx, enum cui_node_type type, const cui_layout *opts, float default_w, float default_h) {
+static cui_node *push_container(cui_ctx *ctx, cui_node_type type, const cui_layout *opts, float default_w, float default_h) {
 	cui_node **root = cui_ctx_root_ptr(ctx);
 	cui_node *n = cui_node_alloc(cui_ctx_arena(ctx));
 	if (!n) return NULL;
