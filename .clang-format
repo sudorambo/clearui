@@ -1,0 +1,5 @@
+# ClearUI C style (research.md: LLVM or Linux, 4-space indent)
+BasedOnStyle: LLVM
+Language: C
+IndentWidth: 4
+ColumnLimit: 100

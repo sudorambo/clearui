@@ -19,6 +19,7 @@ Auto-generated from all feature plans. Last updated: 2026-03-07
 - C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (vendored `stb_truetype.h` for font metrics) (012-review-fixes)
 - C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (zero external dependencies; uses built-in stub platform + software RDI) (013-api-demo-example)
 - C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (stdlib only; optional vendored stb_truetype for font) (014-security-docs-overflow)
+- N/A (no new persistence; CHANGELOG and docs are versioned in repo) (015-release-hygiene-0.2.0)
 
 - C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (zero external dependencies) (002-fix-gitignore)
 
@@ -38,9 +39,9 @@ tests/
 C11 (`-std=c11 -Wall -Wextra -Wpedantic`): Follow standard conventions
 
 ## Recent Changes
+- 015-release-hygiene-0.2.0: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (stdlib only; optional vendored stb_truetype for font)
 - 014-security-docs-overflow: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (stdlib only; optional vendored stb_truetype for font)
 - 013-api-demo-example: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (zero external dependencies; uses built-in stub platform + software RDI)
-- 012-review-fixes: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (vendored `stb_truetype.h` for font metrics)
 
 
 <!-- MANUAL ADDITIONS START -->

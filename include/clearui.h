@@ -9,15 +9,27 @@
  * from the platform display scale (e.g. 2.0 on Hi-DPI) so the render path can
  * scale to physical pixels automatically.
  *
- * Colors are packed 0xAARRGGBB (alpha in high byte, blue in low byte).
+ * Color format: 32-bit packed 0xAARRGGBB (alpha in high byte, then red, green,
+ * blue in low byte). All color parameters (e.g. cui_style.text_color,
+ * cui_draw_rect) use this format. Opaque black is 0xff000000; opaque white
+ * 0xffffffff.
  *
- * Thread safety: none. All API calls must happen on a single thread.
+ * Thread safety: none. All ClearUI API calls MUST be made from a single
+ * thread. No locking is performed; use from multiple threads is undefined
+ * behavior.
+ *
+ * Fixed limits (silent truncation when exceeded):
+ *   CUI_PARENT_STACK_MAX   (16)  — max container nesting depth
+ *   CUI_FOCUSABLE_MAX      (64)  — max focusable widgets per frame
+ *   CUI_A11Y_MAX           (128) — max accessibility entries
+ *   CUI_LAST_CLICKED_ID_MAX(64)  — max widget ID length in bytes (incl. NUL)
+ *   CUI_FRAME_PRINTF_MAX   (65536) — max cui_frame_printf output in bytes
  */
 #ifndef CLEARUI_H
 #define CLEARUI_H
 
 #define CUI_VERSION_MAJOR 0
-#define CUI_VERSION_MINOR 1
+#define CUI_VERSION_MINOR 2
 #define CUI_VERSION_PATCH 0
 
 #include <stddef.h>

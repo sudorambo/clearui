@@ -74,4 +74,14 @@ clean:
 		test_frame_alloc test_draw_cmd test_a11y test_focus \
 		test_hello test_counter test_rdi_platform 2>/dev/null; true
 
-.PHONY: all lib clean unit-tests integration-tests demo
+# Sanitizer builds (recompile everything with sanitizer flags)
+ASAN_FLAGS := -fsanitize=address -fno-omit-frame-pointer -g
+UBSAN_FLAGS := -fsanitize=undefined -fno-omit-frame-pointer -g
+
+asan: clean
+	$(MAKE) all unit-tests integration-tests CFLAGS="$(CFLAGS) $(ASAN_FLAGS)" LDFLAGS="$(LDFLAGS) $(ASAN_FLAGS)"
+
+ubsan: clean
+	$(MAKE) all unit-tests integration-tests CFLAGS="$(CFLAGS) $(UBSAN_FLAGS)" LDFLAGS="$(LDFLAGS) $(UBSAN_FLAGS)"
+
+.PHONY: all lib clean unit-tests integration-tests demo asan ubsan

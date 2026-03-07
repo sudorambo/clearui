@@ -3,9 +3,9 @@ name: CI
 
 on:
   push:
-    branches: [main, 001-clearui-core]
+    branches: [main, 001-clearui-core, 015-release-hygiene-0.2.0]
   pull_request:
-    branches: [main, 001-clearui-core]
+    branches: [main, 001-clearui-core, 015-release-hygiene-0.2.0]
 
 jobs:
   build-and-test:
@@ -25,3 +25,30 @@ jobs:
 
       - name: Integration tests
         run: make integration-tests
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: make mingw-w64-ucrt-x86_64-gcc
+
+      - name: Build and test
+        run: make all unit-tests integration-tests
+        shell: msys2 {0}
+
+  sanitizers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and test with ASan
+        run: make asan
+
+      - name: Build and test with UBSan
+        run: make ubsan

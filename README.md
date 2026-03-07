@@ -4,6 +4,10 @@ A C11 GUI library with a **declarative immediate** model. You write immediate-mo
 
 **Zero dependencies.** Compiles with `gcc`, `clang`, or MSVC. No CMake, no pkg-config, no vcpkg.
 
+- **Color format**: All colors are 32-bit `0xAARRGGBB` (alpha, red, green, blue; alpha in high byte).
+- **Single-threaded**: All API calls must happen on one thread; no locking; multi-threaded use is undefined.
+- **Fixed limits** (silent truncation when exceeded): container nesting 16, focusables per frame 64, a11y entries 128, widget ID length 64 bytes, `cui_frame_printf` output 64 KiB. See `include/clearui.h` for macro names.
+
 ## Hello World
 
 ```c
@@ -237,7 +241,7 @@ cc main.c -I include -L . -lclearui -lm -o myapp
 
 ## CI
 
-GitHub Actions runs `make all`, `make unit-tests`, and `make integration-tests` on Ubuntu and macOS on every push to `main`. See [.github/workflows/ci.yml](.github/workflows/ci.yml).
+GitHub Actions runs `make all`, `make unit-tests`, and `make integration-tests` on Ubuntu, macOS, and Windows on every push/PR. A separate job runs tests under AddressSanitizer and UndefinedBehaviorSanitizer on Ubuntu. See [.github/workflows/ci.yml](.github/workflows/ci.yml).
 
 ## Contributing
 
@@ -247,6 +251,22 @@ The codebase compiles with `-std=c11 -Wall -Wextra -Wpedantic` and zero warnings
 # before submitting
 make clean && make all && make unit-tests && make integration-tests
 ```
+
+Optional: run tests under AddressSanitizer and UndefinedBehaviorSanitizer:
+
+```bash
+make asan    # build and run tests with ASan
+make ubsan   # build and run tests with UBSan
+```
+
+Format C sources with the project style:
+
+```bash
+clang-format -i path/to/file.c
+# or format all: find src tests examples -name '*.c' -exec clang-format -i {} \;
+```
+
+The repo root contains `.clang-format`; use it for consistent style.
 
 Design documents and feature specs live under `specs/`. The project constitution is at `.specify/memory/constitution.md`.
 
