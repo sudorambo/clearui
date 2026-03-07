@@ -38,19 +38,7 @@ static cui_node *push_container(cui_ctx *ctx, enum cui_node_type type, const cui
 
 void cui_center(cui_ctx *ctx) {
 	if (!ctx) return;
-	cui_node **root = cui_ctx_root_ptr(ctx);
-	cui_node *center = cui_node_alloc(cui_ctx_arena(ctx));
-	if (!center) return;
-	center->type = CUI_NODE_CENTER;
-	center->layout_w = 400;
-	center->layout_h = 300;
-	if (!*root) *root = center;
-	else {
-		cui_node *parent = cui_ctx_current_parent(ctx);
-		if (parent) cui_node_append_child(parent, center);
-		else *root = center;
-	}
-	cui_ctx_push_parent(ctx, center);
+	push_container(ctx, CUI_NODE_CENTER, NULL, 400, 300);
 }
 
 void cui_row(cui_ctx *ctx, const cui_layout *opts) {
