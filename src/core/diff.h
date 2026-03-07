@@ -3,6 +3,7 @@
 
 struct cui_node;
 
+void cui_diff_free_retained(struct cui_node **retained);
 void cui_diff_run(struct cui_node *declared, struct cui_node **retained);
 
 #endif

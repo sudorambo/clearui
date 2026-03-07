@@ -234,6 +234,7 @@ int cui_running(cui_ctx *ctx) {
 
 void cui_destroy(cui_ctx *ctx) {
 	if (!ctx) return;
+	cui_diff_free_retained(&ctx->retained_root);
 	cui_draw_buf_fini(&ctx->draw_buf);
 	cui_draw_buf_fini(&ctx->canvas_cmd_buf);
 	cui_draw_buf_fini(&ctx->scaled_buf);
