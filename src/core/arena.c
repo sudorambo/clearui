@@ -1,10 +1,13 @@
 #include "arena.h"
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
 #ifndef CUI_ARENA_DEFAULT_CAP
 #define CUI_ARENA_DEFAULT_CAP (4 * 1024 * 1024)
 #endif
+
+#define CUI_ARENA_DEFAULT_ALIGN _Alignof(max_align_t)
 
 void cui_arena_init(cui_arena *a, size_t initial_cap) {
 	if (initial_cap == 0) initial_cap = CUI_ARENA_DEFAULT_CAP;
@@ -35,18 +38,28 @@ static void grow(cui_arena *a, size_t need) {
 
 void *cui_arena_alloc(cui_arena *a, size_t size) {
 	if (size == 0) return NULL;
-	if (a->pos + size > a->cap) grow(a, size);
-	if (a->pos + size > a->cap) return NULL;
+	size_t align = CUI_ARENA_DEFAULT_ALIGN;
+	size_t pad = (align - (a->pos % align)) % align;
+	size_t total = pad + size;
+	if (a->pos + total > a->cap) grow(a, total);
+	if (a->pos + total > a->cap) return NULL;
+	a->pos += pad;
 	void *p = a->base + a->pos;
 	a->pos += size;
 	return p;
 }
 
 void *cui_arena_alloc_aligned(cui_arena *a, size_t size, size_t align) {
-	size_t pad = (align - (a->pos % align)) % align;
-	if (pad) {
-		void *_ = cui_arena_alloc(a, pad);
-		(void)_;
-	}
-	return cui_arena_alloc(a, size);
+	if (size == 0) return NULL;
+	uintptr_t cur = (uintptr_t)(a->base + a->pos);
+	size_t pad = (align - (cur % align)) % align;
+	size_t total = pad + size;
+	if (a->pos + total > a->cap) grow(a, total);
+	if (a->pos + total > a->cap) return NULL;
+	cur = (uintptr_t)(a->base + a->pos);
+	pad = (align - (cur % align)) % align;
+	a->pos += pad;
+	void *p = a->base + a->pos;
+	a->pos += size;
+	return p;
 }

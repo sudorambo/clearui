@@ -28,6 +28,7 @@ tests/
 C11 (`-std=c11 -Wall -Wextra -Wpedantic`): Follow standard conventions
 
 ## Recent Changes
+- 003-arena-alignment: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (zero external dependencies)
 
 - 002-fix-gitignore: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (zero external dependencies)
 
