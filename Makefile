@@ -61,13 +61,17 @@ test_rdi_platform: $(OBJS) tests/integration/test_rdi_platform.c
 integration-tests: test_hello test_counter test_rdi_platform
 	./test_hello && ./test_counter && ./test_rdi_platform
 
+# Examples
+demo: $(OBJS) examples/demo.c
+	$(CC) $(CFLAGS) -o $@ examples/demo.c $(OBJS) $(LDFLAGS)
+
 %.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -f $(OBJS) build/*.o build/*.a libclearui.a hello counter \
+	rm -f $(OBJS) build/*.o build/*.a libclearui.a hello counter demo \
 		test_arena test_vault test_layout test_font test_draw_buf test_diff \
 		test_frame_alloc test_draw_cmd test_a11y test_focus \
 		test_hello test_counter test_rdi_platform 2>/dev/null; true
 
-.PHONY: all lib clean unit-tests integration-tests
+.PHONY: all lib clean unit-tests integration-tests demo

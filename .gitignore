@@ -18,6 +18,7 @@ config.log
 /test_*
 /hello
 /counter
+/demo
 
 # IDE / editor
 .idea/

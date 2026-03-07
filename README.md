@@ -59,6 +59,16 @@ int main(void) {
 
 `cui_state` gives you persistent, zero-initialized storage keyed by a string. `cui_frame_printf` returns a string that lives until the next frame.
 
+## Full API Demo
+
+[`examples/demo.c`](examples/demo.c) exercises every public API function in a single commented file. It runs headlessly and prints a summary of what happened:
+
+```bash
+make demo && ./demo
+```
+
+Read it as a reference for layout, widgets, state, styling, canvas, accessibility, keyboard input, and platform/RDI wiring.
+
 ## Build
 
 Requires a C11 compiler. Nothing else.
@@ -84,6 +94,9 @@ include/
   clearui.h              # public API (~60 functions)
   clearui_platform.h     # platform adapter interface
   clearui_rdi.h          # render driver interface
+
+examples/
+  demo.c                 # full API reference (make demo && ./demo)
 
 src/
   core/                  # context, arena, vault, diff, draw commands, a11y
