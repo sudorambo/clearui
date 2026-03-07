@@ -7,12 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Planned for 0.4.0 (Scroll & Mouse)
+## [0.4.0] - 2026-03-07
 
-- `cui_inject_scroll(ctx, dx, dy)` — scroll wheel events applied to the scroll container under the pointer; offset clamped to content bounds.
-- `cui_inject_mouse_move(ctx, x, y)` — set pointer position for hover and scroll target.
-- Hover state: `cui_ctx_hovered_id(ctx)` and `cui_ctx_is_hovered(ctx, id)` for widget highlight on hover.
-- Optional id for scroll containers so they can receive scroll; unit test for scroll clamping; integration test for scroll + visible region.
+### Added
+
+- `cui_inject_scroll(ctx, dx, dy)` — scroll wheel events applied to the scroll container under the pointer in `cui_end_frame`; offset clamped to `[0, content_height - view_height]`.
+- `cui_inject_mouse_move(ctx, x, y)` — set pointer position for hover hit-test and scroll target resolution.
+- Hover state: `cui_ctx_hovered_id(ctx)` and `cui_ctx_is_hovered(ctx, id)` so widgets can highlight on hover.
+- `cui_scroll(ctx, id, opts)` — scroll now accepts an optional `id` (may be NULL); scroll containers with an id under the pointer receive scroll wheel input.
+- `cui_ctx_retained_root(ctx)` — accessor for tests and debugging (retained tree root).
+- Unit test `test_scroll` (scroll offset update and clamping) and integration test `test_scroll_region` (multi-frame scroll).
+- README: scroll/hover usage and optional `platform->cursor_set` when hovered id changes.
+
+### Changed
+
+- **API**: `cui_scroll(ctx, opts)` → `cui_scroll(ctx, id, opts)`. Pass `NULL` for `id` for scroll regions that do not receive wheel events.
+
+### Fixed
+
+### Deprecated
+
+### Removed
+
+### Security
 
 ## [0.3.0] - 2026-03-07
 
