@@ -164,7 +164,7 @@ cui_row(ctx, &(cui_layout){ .gap = 8 });                 // horizontal
 cui_column(ctx, &(cui_layout){ .gap = 12, .padding = 16 }); // vertical
 cui_stack(ctx, &(cui_layout){});                          // overlapping
 cui_wrap(ctx, &(cui_layout){ .gap = 4 });                // flow wrap
-cui_scroll(ctx, &(cui_scroll_opts){ .max_height = 200 }); // scrollable
+cui_scroll(ctx, NULL, &(cui_scroll_opts){ .max_height = 200 }); // scrollable (id NULL = no wheel target)
 ```
 
 ### Layout options
@@ -208,6 +208,8 @@ cui_inject_key(ctx, CUI_KEY_TAB);        // programmatic focus control
 ```
 
 For the focused text input, use `cui_inject_char(ctx, codepoint)` to insert printable characters (e.g. ASCII 32–126) at the cursor, and `cui_inject_key(ctx, CUI_KEY_BACKSPACE)` or `cui_inject_key(ctx, CUI_KEY_DELETE)` to remove the character before or at the cursor. `cui_text_input` returns **1** when that widget’s buffer was modified in the previous frame (insert or backspace/delete), **0** otherwise.
+
+**Scroll and hover**: Call `cui_inject_mouse_move(ctx, x, y)` each frame (or when the platform reports motion). The scroll container **under the pointer** receives scroll wheel events: use `cui_inject_scroll(ctx, dx, dy)` (e.g. `dy < 0` = scroll down). Give scroll containers an id so they can be targeted: `cui_scroll(ctx, "panel", &(cui_scroll_opts){ .max_height = 200 })`. Use `cui_ctx_hovered_id(ctx)` or `cui_ctx_is_hovered(ctx, "btn")` to highlight the widget under the pointer. Optional: when `cui_ctx_hovered_id` changes, call `platform->cursor_set(platform_ctx, shape)` (see `clearui_platform.h`) to change the cursor shape (e.g. pointer over buttons).
 
 Focus indicators follow WCAG 2.1 AA. The internal accessibility tree exposes roles, labels, and composable state (`"checked"`, `"focused"`, `"checked focused"`) for platform screen reader integration.
 

@@ -71,6 +71,11 @@ struct cui_ctx {
 	unsigned int     pending_char;      /* injected printable char for focused text input; consumed in end_frame */
 	char             text_input_changed_id[CUI_LAST_CLICKED_ID_MAX]; /* id of text input modified last frame; consumed when cui_text_input returns 1 */
 
+	/* Mouse: position and hover (set by inject_mouse_move; hover hit-test in end_frame) */
+	int              mouse_x, mouse_y;
+	char             hovered_id[CUI_LAST_CLICKED_ID_MAX];
+	int              pending_scroll_dx, pending_scroll_dy;
+
 	cui_a11y_tree    a11y_tree;
 };
 
@@ -266,6 +271,70 @@ static void hit_test_visit(cui_ctx *ctx, cui_node *n) {
 		hit_test_visit(ctx, c);
 }
 
+/* Hover hit-test: set hovered_id to the topmost interactive node under (mouse_x, mouse_y). Depth-first so last wins. */
+static void hover_hit_test_visit(cui_ctx *ctx, cui_node *n) {
+	if (!ctx || !n) return;
+	if ((n->type == CUI_NODE_BUTTON || n->type == CUI_NODE_CHECKBOX || n->type == CUI_NODE_ICON_BUTTON || n->type == CUI_NODE_TEXT_INPUT) && n->button_id &&
+	    (float)ctx->mouse_x >= n->layout_x && (float)ctx->mouse_x < n->layout_x + n->layout_w &&
+	    (float)ctx->mouse_y >= n->layout_y && (float)ctx->mouse_y < n->layout_y + n->layout_h) {
+		size_t len = strlen(n->button_id);
+		if (len >= CUI_LAST_CLICKED_ID_MAX) len = CUI_LAST_CLICKED_ID_MAX - 1;
+		memcpy(ctx->hovered_id, n->button_id, len + 1);
+		ctx->hovered_id[len] = '\0';
+	}
+	for (cui_node *c = n->first_child; c; c = c->next_sibling)
+		hover_hit_test_visit(ctx, c);
+}
+
+/* Find the deepest scroll node under (mouse_x, mouse_y) that has button_id; return it or NULL. */
+static cui_node *scroll_node_under_point(cui_ctx *ctx, cui_node *n) {
+	if (!ctx || !n) return NULL;
+	cui_node *found = NULL;
+	if (n->type == CUI_NODE_SCROLL && n->button_id && n->button_id[0] &&
+	    (float)ctx->mouse_x >= n->layout_x && (float)ctx->mouse_x < n->layout_x + n->layout_w &&
+	    (float)ctx->mouse_y >= n->layout_y && (float)ctx->mouse_y < n->layout_y + n->layout_h)
+		found = n;
+	for (cui_node *c = n->first_child; c; c = c->next_sibling) {
+		cui_node *ch = scroll_node_under_point(ctx, c);
+		if (ch) found = ch;
+	}
+	return found;
+}
+
+/* Content height of a scroll node (sum of children layout_h + gaps). */
+static float scroll_content_height(cui_node *scroll) {
+	if (!scroll) return 0.f;
+	float gap = scroll->layout_opts.gap;
+	float h = 0.f;
+	int n = 0;
+	for (cui_node *c = scroll->first_child; c; c = c->next_sibling) {
+		h += c->layout_h;
+		n++;
+	}
+	if (n > 1) h += gap * (float)(n - 1);
+	return h;
+}
+
+/* Apply pending scroll to the scroll node under the pointer; clamp offset. */
+static void apply_pending_scroll(cui_ctx *ctx) {
+	int dx = ctx->pending_scroll_dx;
+	int dy = ctx->pending_scroll_dy;
+	ctx->pending_scroll_dx = 0;
+	ctx->pending_scroll_dy = 0;
+	if (dx == 0 && dy == 0) return;
+	cui_node *scroll = scroll_node_under_point(ctx, ctx->declared_root);
+	if (!scroll || !scroll->button_id) return;
+	cui_node *rn = retained_node_by_id(ctx->retained_root, scroll->button_id);
+	if (!rn || rn->type != CUI_NODE_SCROLL) return;
+	float content_h = scroll_content_height(scroll);
+	float view_h = rn->scroll_max_h > 0 ? rn->scroll_max_h : 150.f;
+	rn->scroll_offset_y += (float)dy;
+	if (rn->scroll_offset_y < 0.f) rn->scroll_offset_y = 0.f;
+	float max_off = content_h - view_h;
+	if (max_off < 0.f) max_off = 0.f;
+	if (rn->scroll_offset_y > max_off) rn->scroll_offset_y = max_off;
+}
+
 /**
  * End-of-frame pipeline:
  *   1. Process keyboard input (Tab/Enter)
@@ -286,6 +355,9 @@ void cui_end_frame(cui_ctx *ctx) {
 		float vh = (float)(ctx->config.height > 0 ? ctx->config.height : 300);
 		cui_layout_run(ctx->declared_root, vw, vh);
 	}
+	ctx->hovered_id[0] = '\0';
+	hover_hit_test_visit(ctx, ctx->declared_root);
+	apply_pending_scroll(ctx);
 	build_focusable_list(ctx, ctx->declared_root);
 	cui_a11y_build(ctx, ctx->declared_root, &ctx->a11y_tree);
 	hit_test_visit(ctx, ctx->declared_root);
@@ -327,6 +399,24 @@ const char *cui_frame_printf(cui_ctx *ctx, const char *fmt, ...) {
 
 void cui_inject_click(cui_ctx *ctx, int x, int y) {
 	if (ctx) { ctx->last_click_x = x; ctx->last_click_y = y; }
+}
+
+void cui_inject_mouse_move(cui_ctx *ctx, int x, int y) {
+	if (ctx) { ctx->mouse_x = x; ctx->mouse_y = y; }
+}
+
+void cui_inject_scroll(cui_ctx *ctx, int dx, int dy) {
+	if (ctx) { ctx->pending_scroll_dx = dx; ctx->pending_scroll_dy = dy; }
+}
+
+const char *cui_ctx_hovered_id(cui_ctx *ctx) {
+	if (!ctx || !ctx->hovered_id[0]) return NULL;
+	return ctx->hovered_id;
+}
+
+int cui_ctx_is_hovered(cui_ctx *ctx, const char *id) {
+	if (!ctx || !id) return 0;
+	return ctx->hovered_id[0] && strcmp(ctx->hovered_id, id) == 0 ? 1 : 0;
 }
 
 void cui_run(cui_ctx *ctx, cui_ui_func ui_func) {
@@ -463,6 +553,10 @@ void cui_dev_overlay(cui_ctx *ctx) {
 
 cui_node *cui_ctx_declared_root(cui_ctx *ctx) {
 	return ctx ? ctx->declared_root : NULL;
+}
+
+cui_node *cui_ctx_retained_root(cui_ctx *ctx) {
+	return ctx ? ctx->retained_root : NULL;
 }
 
 void cui_ctx_build_a11y(cui_ctx *ctx) {

@@ -126,7 +126,8 @@ void cui_wrap(cui_ctx *ctx, const cui_layout *opts);
 typedef struct cui_scroll_opts { float max_height; } cui_scroll_opts;
 typedef struct cui_text_input_opts { const char *placeholder; } cui_text_input_opts;
 
-void cui_scroll(cui_ctx *ctx, const cui_scroll_opts *opts);
+/** Scroll container. id may be NULL; if non-NULL, this scroll can receive scroll wheel events when under the pointer. */
+void cui_scroll(cui_ctx *ctx, const char *id, const cui_scroll_opts *opts);
 void cui_end(cui_ctx *ctx);
 
 void cui_spacer(cui_ctx *ctx, float w, float h);
@@ -143,6 +144,15 @@ void cui_draw_text(cui_ctx *ctx, float x, float y, const char *text, unsigned in
 #define CUI_ICON_TRASH 1
 
 void cui_inject_click(cui_ctx *ctx, int x, int y);
+
+/** Sets pointer position for hover hit-test and scroll target. Call each frame (or when platform reports move). */
+void cui_inject_mouse_move(cui_ctx *ctx, int x, int y);
+/** Scroll wheel: dx/dy in logical pixels; dy &lt; 0 = scroll down. Processed in end_frame; scroll container under pointer receives delta. */
+void cui_inject_scroll(cui_ctx *ctx, int dx, int dy);
+/** Id of the widget under the pointer (after hover hit-test in end_frame), or NULL if none. */
+const char *cui_ctx_hovered_id(cui_ctx *ctx);
+/** Returns 1 if id is the current hovered widget id, 0 otherwise. */
+int cui_ctx_is_hovered(cui_ctx *ctx, const char *id);
 
 /* Accessibility: override for next widget */
 void cui_aria_label(cui_ctx *ctx, const char *label);

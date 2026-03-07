@@ -77,7 +77,7 @@ static void build_ui(cui_ctx *ctx, int *counter, int *checked, char *text_buf) {
 	    cui_spacer(ctx, 0, 8);
 
 	    /* cui_scroll: scrollable container; clips children beyond max_height. */
-	    cui_scroll(ctx, &(cui_scroll_opts){ .max_height = 60 });
+	    cui_scroll(ctx, NULL, &(cui_scroll_opts){ .max_height = 60 });
 	      cui_label(ctx, "scrollable content");
 	    cui_end(ctx);
 

@@ -50,8 +50,10 @@ test_focus: $(OBJS) tests/unit/test_focus.c
 	$(CC) $(CFLAGS) -o $@ tests/unit/test_focus.c $(OBJS) $(LDFLAGS)
 test_text_input: $(OBJS) tests/unit/test_text_input.c
 	$(CC) $(CFLAGS) -o $@ tests/unit/test_text_input.c $(OBJS) $(LDFLAGS)
-unit-tests: test_arena test_vault test_layout test_font test_draw_buf test_diff test_frame_alloc test_draw_cmd test_a11y test_focus test_text_input
-	./test_arena && ./test_vault && ./test_layout && ./test_font && ./test_draw_buf && ./test_diff && ./test_frame_alloc && ./test_draw_cmd && ./test_a11y && ./test_focus && ./test_text_input
+test_scroll: $(OBJS) tests/unit/test_scroll.c
+	$(CC) $(CFLAGS) -o $@ tests/unit/test_scroll.c $(OBJS) $(LDFLAGS)
+unit-tests: test_arena test_vault test_layout test_font test_draw_buf test_diff test_frame_alloc test_draw_cmd test_a11y test_focus test_text_input test_scroll
+	./test_arena && ./test_vault && ./test_layout && ./test_font && ./test_draw_buf && ./test_diff && ./test_frame_alloc && ./test_draw_cmd && ./test_a11y && ./test_focus && ./test_text_input && ./test_scroll
 
 # Integration tests
 test_hello: $(OBJS) tests/integration/test_hello.c
@@ -62,8 +64,10 @@ test_rdi_platform: $(OBJS) tests/integration/test_rdi_platform.c
 	$(CC) $(CFLAGS) -o $@ tests/integration/test_rdi_platform.c $(OBJS) $(LDFLAGS)
 test_text_input_edit: $(OBJS) tests/integration/test_text_input_edit.c
 	$(CC) $(CFLAGS) -o $@ tests/integration/test_text_input_edit.c $(OBJS) $(LDFLAGS)
-integration-tests: test_hello test_counter test_rdi_platform test_text_input_edit
-	./test_hello && ./test_counter && ./test_rdi_platform && ./test_text_input_edit
+test_scroll_region: $(OBJS) tests/integration/test_scroll_region.c
+	$(CC) $(CFLAGS) -o $@ tests/integration/test_scroll_region.c $(OBJS) $(LDFLAGS)
+integration-tests: test_hello test_counter test_rdi_platform test_text_input_edit test_scroll_region
+	./test_hello && ./test_counter && ./test_rdi_platform && ./test_text_input_edit && ./test_scroll_region
 
 # Examples
 demo: $(OBJS) examples/demo.c
@@ -75,8 +79,8 @@ demo: $(OBJS) examples/demo.c
 clean:
 	rm -f $(OBJS) build/*.o build/*.a libclearui.a hello counter demo \
 		test_arena test_vault test_layout test_font test_draw_buf test_diff \
-		test_frame_alloc test_draw_cmd test_a11y test_focus test_text_input \
-		test_hello test_counter test_rdi_platform test_text_input_edit 2>/dev/null; true
+		test_frame_alloc test_draw_cmd test_a11y test_focus test_text_input test_scroll \
+		test_hello test_counter test_rdi_platform test_text_input_edit test_scroll_region 2>/dev/null; true
 
 # Sanitizer builds (recompile everything with sanitizer flags)
 ASAN_FLAGS := -fsanitize=address -fno-omit-frame-pointer -g

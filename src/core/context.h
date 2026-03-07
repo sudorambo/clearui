@@ -49,6 +49,7 @@ const char       *cui_ctx_take_aria_label(cui_ctx *ctx);
 int               cui_ctx_take_tab_index(cui_ctx *ctx);
 
 cui_node        *cui_ctx_declared_root(cui_ctx *ctx);
+cui_node        *cui_ctx_retained_root(cui_ctx *ctx);
 void             cui_ctx_build_a11y(cui_ctx *ctx);
 const cui_a11y_tree *cui_ctx_a11y_tree(cui_ctx *ctx);
 

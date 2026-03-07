@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Planned for 0.4.0 (Scroll & Mouse)
+
+- `cui_inject_scroll(ctx, dx, dy)` — scroll wheel events applied to the scroll container under the pointer; offset clamped to content bounds.
+- `cui_inject_mouse_move(ctx, x, y)` — set pointer position for hover and scroll target.
+- Hover state: `cui_ctx_hovered_id(ctx)` and `cui_ctx_is_hovered(ctx, id)` for widget highlight on hover.
+- Optional id for scroll containers so they can receive scroll; unit test for scroll clamping; integration test for scroll + visible region.
+
 ## [0.3.0] - 2026-03-07
 
 ### Added
