@@ -1,0 +1,35 @@
+---
+description: Project Development Guidelines
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# clearui Development Guidelines
+
+Auto-generated from all feature plans. Last updated: 2026-03-07
+
+## Active Technologies
+
+- C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (zero external dependencies) (002-fix-gitignore)
+
+## Project Structure
+
+```text
+src/
+tests/
+```
+
+## Commands
+
+# Add commands for C11 (`-std=c11 -Wall -Wextra -Wpedantic`)
+
+## Code Style
+
+C11 (`-std=c11 -Wall -Wextra -Wpedantic`): Follow standard conventions
+
+## Recent Changes
+
+- 002-fix-gitignore: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (zero external dependencies)
+
+<!-- MANUAL ADDITIONS START -->
+<!-- MANUAL ADDITIONS END -->

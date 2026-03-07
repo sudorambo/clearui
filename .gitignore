@@ -14,6 +14,11 @@ autom4te.cache/
 config.status
 config.log
 
+# Test and example binaries (Makefile outputs to repo root)
+/test_*
+/hello
+/counter
+
 # IDE / editor
 .idea/
 .vscode/
