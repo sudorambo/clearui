@@ -38,7 +38,8 @@ static void init_font_once(void) {
 	s_inited = 1;
 }
 
-/* Decode next UTF-8 codepoint; return byte advance (0 at end), codepoint in *out. */
+/* Decode next UTF-8 codepoint; return byte advance (0 at end), codepoint in *out.
+ * s must be a valid C string (NUL-terminated). Truncated or non-terminated buffers cause undefined behavior (buffer overread). */
 static int utf8_next(const unsigned char *s, int *out_cp) {
 	unsigned char c = s[0];
 	if (c == 0) { *out_cp = 0; return 0; }
@@ -54,6 +55,7 @@ int cui_font_default_id(void) {
 	return 0;
 }
 
+/* utf8 must be a valid C string (NUL-terminated, valid UTF-8). */
 void cui_font_measure(int font_id, int font_size_px, const char *utf8, float *out_width, float *out_height) {
 	if (out_width) *out_width = 0.f;
 	if (out_height) *out_height = font_size_px > 0 ? (float)font_size_px : 16.f;

@@ -1,3 +1,9 @@
+/**
+ * Linear (bump) arena allocator. Reset per frame to reclaim all UI node memory
+ * without per-node free calls. Grows via realloc when capacity is exceeded,
+ * which may relocate the buffer -- callers must not hold stale pointers across
+ * allocations that could trigger growth.
+ */
 #include "arena.h"
 #include <stdint.h>
 #include <stdlib.h>
@@ -7,6 +13,7 @@
 #define CUI_ARENA_DEFAULT_CAP (4 * 1024 * 1024)
 #endif
 
+/* Match malloc's alignment guarantee so arena-allocated structs are safe for any type. */
 #define CUI_ARENA_DEFAULT_ALIGN _Alignof(max_align_t)
 
 void cui_arena_init(cui_arena *a, size_t initial_cap) {
@@ -26,9 +33,14 @@ void cui_arena_free(cui_arena *a) {
 	a->pos = a->cap = 0;
 }
 
+/* Double capacity until the arena can satisfy `need` more bytes. Bails on overflow. */
 static void grow(cui_arena *a, size_t need) {
+	if (a->cap > SIZE_MAX / 2) return;
 	size_t new_cap = a->cap ? a->cap * 2 : 256;
-	while (new_cap < a->pos + need) new_cap *= 2;
+	while (new_cap < a->pos + need) {
+		if (new_cap > SIZE_MAX / 2) return;
+		new_cap *= 2;
+	}
 	char *n = (char *)realloc(a->base, new_cap);
 	if (n) {
 		a->base = n;
@@ -49,6 +61,10 @@ void *cui_arena_alloc(cui_arena *a, size_t size) {
 	return p;
 }
 
+/**
+ * Recomputes padding after grow() because realloc may change the base address,
+ * invalidating the pre-grow alignment offset.
+ */
 void *cui_arena_alloc_aligned(cui_arena *a, size_t size, size_t align) {
 	if (size == 0) return NULL;
 	if (align == 0 || (align & (align - 1)) != 0) return NULL;

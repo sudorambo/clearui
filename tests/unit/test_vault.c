@@ -18,7 +18,7 @@ int main(void) {
 
 	char *str = (char *)cui_vault_get(v, "name", 64);
 	assert(str != NULL);
-	strcpy(str, "hello");
+	snprintf(str, 64, "%s", "hello");
 
 	char *str2 = (char *)cui_vault_get(v, "name", 64);
 	assert(str2 == str);

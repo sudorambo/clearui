@@ -1,3 +1,9 @@
+/**
+ * Diff engine: reconcile this frame's declared tree against the retained tree
+ * to preserve persistent widget state (scroll offset, checkbox, text buffer)
+ * across frames. Matching uses button_id (key) first, then positional index.
+ * Unmatched retained nodes are freed; new declared nodes get fresh retained clones.
+ */
 #include "diff.h"
 #include "node.h"
 #include <stdlib.h>
@@ -65,14 +71,18 @@ static void copy_state_retained_to_declared(cui_node *declared, const cui_node *
 	}
 }
 
-/* Reconcile declared subtree with retained; update *retained in place or replace. */
+/**
+ * Two-phase child reconciliation:
+ *   1. Match declared children to retained children (by key, then position).
+ *   2. Free unmatched retained children; clone unmatched declared children.
+ * This is intentionally O(n*m) for simplicity; typical UI trees have few children per node.
+ */
 static void reconcile(cui_node *declared, cui_node **retained) {
 	if (!retained) return;
 	if (!declared) {
 		cui_diff_free_retained(retained);
 		return;
 	}
-	/* Count declared and retained children; collect retained into array so we can free unused after we re-link. */
 	int num_decl = 0, num_ret = 0;
 	for (cui_node *c = declared->first_child; c; c = c->next_sibling) num_decl++;
 	for (cui_node *c = *retained ? (*retained)->first_child : NULL; c; c = c->next_sibling) num_ret++;
@@ -82,7 +92,12 @@ static void reconcile(cui_node *declared, cui_node **retained) {
 	if (num_ret > 0) {
 		ret_arr = (cui_node **)malloc((size_t)num_ret * sizeof(cui_node *));
 		used = (int *)malloc((size_t)num_ret * sizeof(int));
-		if (ret_arr && used) {
+		if (!ret_arr || !used) {
+			free(ret_arr);
+			free(used);
+			ret_arr = NULL;
+			used = NULL;
+		} else {
 			memset(used, 0, (size_t)num_ret * sizeof(int));
 			int i = 0;
 			for (cui_node *c = *retained ? (*retained)->first_child : NULL; c && i < num_ret; c = c->next_sibling, i++)

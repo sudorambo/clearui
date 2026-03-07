@@ -1,3 +1,4 @@
+/* Scroll container: clips children beyond max_height. Scroll offset is preserved across frames by the diff engine. */
 #include "../core/context.h"
 #include "../core/node.h"
 #include "../../include/clearui.h"

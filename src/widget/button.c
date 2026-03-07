@@ -1,3 +1,4 @@
+/* Button widget: allocates a BUTTON node, applies current style, and consumes click via check-and-clear. */
 #include "../core/context.h"
 #include "../core/node.h"
 #include "../../include/clearui.h"

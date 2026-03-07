@@ -1,3 +1,4 @@
+/* Label widget: leaf node for static text. Styled labels use push/pop style internally. */
 #include "../core/context.h"
 #include "../core/node.h"
 #include "../../include/clearui.h"

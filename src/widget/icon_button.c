@@ -1,3 +1,4 @@
+/* Icon button: small button identified by an icon enum. Currently renders icon as a text glyph placeholder. */
 #include "../core/context.h"
 #include "../core/node.h"
 #include "../../include/clearui.h"

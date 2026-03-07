@@ -1,3 +1,4 @@
+/* Canvas widget: custom drawing surface. Draw commands go to a separate buffer, replayed into the main scene during tree-to-draw conversion. */
 #include "../core/context.h"
 #include "../core/node.h"
 #include "../core/draw_cmd.h"

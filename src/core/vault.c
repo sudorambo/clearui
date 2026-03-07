@@ -1,4 +1,11 @@
+/**
+ * Vault: persistent key-value store for application state (cui_state).
+ * Open-addressed hash table with linear probing and FNV-1a hashing.
+ * Grows at 50% load factor. Values are heap-allocated, zero-initialized on
+ * first access, and stable (same pointer returned on subsequent lookups).
+ */
 #include "vault.h"
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -11,6 +18,7 @@ static char *dup_str(const char *s) {
 
 #define CUI_VAULT_INITIAL_CAP 32
 
+/* FNV-1a 64-bit: fast, well-distributed hash for short string keys. */
 static unsigned long long fnv1a(const char *s) {
 	unsigned long long h = 14695981039346656037ULL;
 	while (*s) { h ^= (unsigned char)*s++; h *= 1099511628211ULL; }
@@ -62,6 +70,8 @@ static struct slot *find(cui_vault *v, const char *key, unsigned long long hash)
 }
 
 static int expand(cui_vault *v) {
+	/* Avoid integer overflow when doubling capacity */
+	if (v->cap > SIZE_MAX / 2) return -1;
 	size_t new_cap = v->cap * 2;
 	struct slot *n = (struct slot *)calloc(new_cap, sizeof(struct slot));
 	if (!n) return -1;
@@ -78,6 +88,11 @@ static int expand(cui_vault *v) {
 	return 0;
 }
 
+/**
+ * Get-or-create: returns existing value for key, or allocates a new
+ * zero-initialized block of `size` bytes. Must re-probe after expand()
+ * because slot pointers are invalidated by the reallocation.
+ */
 void *cui_vault_get(cui_vault *v, const char *key, size_t size) {
 	if (!v || !key) return NULL;
 	unsigned long long h = fnv1a(key);

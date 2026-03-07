@@ -1,4 +1,13 @@
+/**
+ * Frame allocator: linear bump allocator for per-frame transient data
+ * (format strings from cui_frame_printf, scratch buffers). Reset each frame;
+ * grows via realloc if a single frame exceeds capacity.
+ *
+ * Unlike the arena, this does NOT guarantee alignment -- it's used for
+ * byte arrays and strings where alignment doesn't matter.
+ */
 #include "frame_alloc.h"
+#include <stdint.h>
 #include <stdlib.h>
 
 #define CUI_FRAME_DEFAULT_CAP 65536
@@ -23,8 +32,12 @@ void cui_frame_allocator_free(cui_frame_allocator *f) {
 void *cui_frame_allocator_alloc(cui_frame_allocator *f, size_t size) {
 	if (size == 0) return NULL;
 	if (f->pos + size > f->cap) {
+		if (f->cap > SIZE_MAX / 2) return NULL;
 		size_t new_cap = f->cap ? f->cap * 2 : CUI_FRAME_DEFAULT_CAP;
-		while (new_cap < f->pos + size) new_cap *= 2;
+		while (new_cap < f->pos + size) {
+			if (new_cap > SIZE_MAX / 2) return NULL;
+			new_cap *= 2;
+		}
 		char *n = (char *)realloc(f->base, new_cap);
 		if (!n) return NULL;
 		f->base = n;

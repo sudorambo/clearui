@@ -18,6 +18,7 @@ Auto-generated from all feature plans. Last updated: 2026-03-07
 - Declared tree in frame arena (reset each frame). Retained tree in context-owned storage (heap or persistent arena); diff allocates/frees retained nodes. (011-diff-engine)
 - C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (vendored `stb_truetype.h` for font metrics) (012-review-fixes)
 - C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (zero external dependencies; uses built-in stub platform + software RDI) (013-api-demo-example)
+- C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (stdlib only; optional vendored stb_truetype for font) (014-security-docs-overflow)
 
 - C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (zero external dependencies) (002-fix-gitignore)
 
@@ -37,9 +38,9 @@ tests/
 C11 (`-std=c11 -Wall -Wextra -Wpedantic`): Follow standard conventions
 
 ## Recent Changes
+- 014-security-docs-overflow: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (stdlib only; optional vendored stb_truetype for font)
 - 013-api-demo-example: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (zero external dependencies; uses built-in stub platform + software RDI)
 - 012-review-fixes: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (vendored `stb_truetype.h` for font metrics)
-- 011-diff-engine: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None
 
 
 <!-- MANUAL ADDITIONS START -->

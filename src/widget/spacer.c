@@ -1,3 +1,4 @@
+/* Spacer: invisible sizing element for adding fixed gaps between siblings. */
 #include "../core/context.h"
 #include "../core/node.h"
 #include "../../include/clearui.h"

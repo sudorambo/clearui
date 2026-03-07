@@ -1,3 +1,4 @@
+/* Text input widget: displays a caller-owned char buffer. Keyboard editing not yet wired (stub returns 0). */
 #include "../core/context.h"
 #include "../core/node.h"
 #include "../../include/clearui.h"

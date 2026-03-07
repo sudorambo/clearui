@@ -1,3 +1,4 @@
+/* Checkbox widget: toggles a caller-owned int on click. Visual state ("[x]"/"[ ]") derived from the boolean. */
 #include "../core/context.h"
 #include "../core/node.h"
 #include "../../include/clearui.h"

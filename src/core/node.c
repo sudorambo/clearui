@@ -1,3 +1,8 @@
+/**
+ * UI tree nodes: arena-allocated, intrusive linked-list children.
+ * Nodes are allocated from the per-frame arena and never individually freed.
+ * The tree is rebuilt every frame; the diff engine reconciles with retained state.
+ */
 #include "node.h"
 #include "arena.h"
 #include <string.h>

@@ -1,3 +1,4 @@
+/* Container widgets: row, column, center, stack, wrap, and the shared cui_end closer. */
 #include "../core/context.h"
 #include "../core/node.h"
 #include "../../include/clearui.h"

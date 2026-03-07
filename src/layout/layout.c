@@ -1,6 +1,12 @@
 /**
- * Flexbox-inspired layout: single pass + flex-grow.
- * CENTER, ROW, COLUMN, STACK, WRAP containers; leaf nodes get intrinsic or default size.
+ * Flexbox-inspired layout engine.
+ *
+ * Two-phase: measure() computes intrinsic sizes bottom-up, then run_layout()
+ * positions children top-down using the container's allocated space.
+ * Containers: CENTER (centered column), ROW, COLUMN, STACK (z-overlap), WRAP (flow).
+ * Leaf nodes use content-aware sizing (font metrics for labels, fixed for buttons).
+ *
+ * All sizes are in logical pixels; Hi-DPI scaling happens in the render path.
  */
 #include "layout.h"
 #include "../core/node.h"
@@ -144,6 +150,7 @@ static void measure(cui_node *n) {
 	clamp_node_size(n);
 }
 
+/* Position pass: place each child within its parent's content box (after padding). */
 static void run_layout(cui_node *n, float x, float y, float w, float h) {
 	if (!n) return;
 

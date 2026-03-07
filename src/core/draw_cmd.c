@@ -1,7 +1,14 @@
+/**
+ * Draw command buffer: tagged-union command list consumed by RDI drivers.
+ * Also contains the tree-to-draw-commands visitor (cui_build_draw_from_tree)
+ * which walks the laid-out node tree and emits rects, text, lines, and scissor
+ * commands for each visible widget.
+ */
 #include "draw_cmd.h"
 #include "node.h"
 #include "context.h"
 #include "theme.h"
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -30,6 +37,7 @@ static void emit_label(cui_node *root, cui_draw_command_buffer *buf, float ox, f
 	}
 }
 
+/* Copy canvas draw commands into the main scene buffer, offsetting by the canvas node's position. */
 static void replay_canvas_buf(cui_draw_command_buffer *dst, const cui_draw_command_buffer *src, float ox, float oy) {
 	if (!dst || !src) return;
 	for (size_t i = 0; i < src->count; i++) {
@@ -103,6 +111,13 @@ void cui_build_draw_from_tree(cui_ctx *ctx, cui_node *root, cui_draw_command_buf
 
 void cui_draw_buf_init(cui_draw_command_buffer *buf, size_t capacity) {
 	if (!buf || capacity == 0) return;
+	/* Avoid integer overflow: capacity must not exceed SIZE_MAX / sizeof(cui_draw_cmd) */
+	if (capacity > SIZE_MAX / sizeof(cui_draw_cmd)) {
+		buf->cmd = NULL;
+		buf->capacity = 0;
+		buf->count = 0;
+		return;
+	}
 	buf->cmd = (cui_draw_cmd *)malloc(sizeof(cui_draw_cmd) * capacity);
 	buf->capacity = buf->cmd ? capacity : 0;
 	buf->count = 0;

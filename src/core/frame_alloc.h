@@ -1,6 +1,11 @@
 #ifndef CLEARUI_FRAME_ALLOC_H
 #define CLEARUI_FRAME_ALLOC_H
 
+/**
+ * Per-frame bump allocator for transient byte data (strings, scratch buffers).
+ * Reset at each cui_begin_frame. No alignment guarantee (byte-oriented).
+ */
+
 #include <stddef.h>
 
 typedef struct cui_frame_allocator {

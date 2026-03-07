@@ -1,6 +1,11 @@
 #ifndef CLEARUI_VAULT_H
 #define CLEARUI_VAULT_H
 
+/**
+ * Vault: opaque persistent key-value store for cui_state.
+ * Heap-allocated; survives across frames for the context's lifetime.
+ */
+
 #include <stddef.h>
 
 typedef struct cui_vault cui_vault;

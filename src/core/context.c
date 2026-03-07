@@ -1,3 +1,10 @@
+/**
+ * cui_ctx: the central state object. Owns all allocators, draw buffers, the
+ * declared/retained trees, focus state, style stack, and accessibility tree.
+ *
+ * Lifetime: cui_create -> (begin_frame/end_frame)* -> cui_destroy.
+ * Not thread-safe; all calls must happen on a single thread.
+ */
 #include "context.h"
 #include "../../include/clearui_platform.h"
 #include "arena.h"
@@ -15,44 +22,57 @@
 #include <stdio.h>
 
 #define CUI_ARENA_DEFAULT (4 * 1024 * 1024)
-#define CUI_PARENT_STACK_MAX 16
-#define CUI_LAST_CLICKED_ID_MAX 64
-#define CUI_STYLE_STACK_MAX 16
-#define CUI_FOCUSABLE_MAX 64
+#define CUI_PARENT_STACK_MAX 16          /* max container nesting depth */
+#define CUI_LAST_CLICKED_ID_MAX 64       /* max widget ID length (bytes incl NUL) */
+#define CUI_STYLE_STACK_MAX 16           /* max nested push_style calls */
+#define CUI_FOCUSABLE_MAX 64             /* max focusable widgets per frame */
 
 struct cui_ctx {
-	cui_arena             arena;
-	cui_frame_allocator frame;
-	cui_vault       *vault;
+	/* Memory: three allocators with different lifetimes */
+	cui_arena             arena;       /* reset each frame; owns declared UI nodes */
+	cui_frame_allocator   frame;       /* reset each frame; transient strings (frame_printf) */
+	cui_vault            *vault;       /* persistent; application state (cui_state) */
+
 	cui_config       config;
 	const cui_platform *platform;
 	const cui_rdi    *rdi;
 	cui_platform_ctx *platform_ctx;
 	cui_rdi_context  *rdi_ctx;
+
+	/* Three draw buffers: main scene, canvas overlay, and Hi-DPI scaled copy */
 	cui_draw_command_buffer draw_buf;
 	cui_draw_command_buffer canvas_cmd_buf;
 	cui_draw_command_buffer scaled_buf;
-	cui_node        *canvas_node_for_buf;
-	cui_node        *declared_root;
-	cui_node        *retained_root;
-	int             running;
+
+	cui_node        *canvas_node_for_buf; /* non-NULL while inside a cui_canvas block */
+	cui_node        *declared_root;       /* this frame's UI tree (arena-allocated) */
+	cui_node        *retained_root;       /* persistent tree for diff/state preservation */
+	int              running;
+
+	/* Container nesting stack -- push on cui_row/column/etc, pop on cui_end */
 	cui_node        *parent_stack[CUI_PARENT_STACK_MAX];
-	int             parent_top;
-	cui_style       style_stack[CUI_STYLE_STACK_MAX];
-	int             style_top;
-	cui_style       current_style;
-	int             last_click_x, last_click_y;
-	char            last_clicked_id[CUI_LAST_CLICKED_ID_MAX];
-	/* Focus / keyboard */
-	char            focusable_ids[CUI_FOCUSABLE_MAX][CUI_LAST_CLICKED_ID_MAX];
-	int             focusable_count;
-	int             focused_index;
-	int             next_tab_index;
-	const char     *next_aria_label;
-	int             pending_key;
-	cui_a11y_tree   a11y_tree;
+	int              parent_top;
+
+	cui_style        style_stack[CUI_STYLE_STACK_MAX];
+	int              style_top;
+	cui_style        current_style;
+
+	/* Input: click coordinates are set by inject_click, consumed during end_frame hit-test */
+	int              last_click_x, last_click_y;
+	char             last_clicked_id[CUI_LAST_CLICKED_ID_MAX];
+
+	/* Focus / keyboard navigation */
+	char             focusable_ids[CUI_FOCUSABLE_MAX][CUI_LAST_CLICKED_ID_MAX];
+	int              focusable_count;
+	int              focused_index;
+	int              next_tab_index;
+	const char      *next_aria_label;
+	int              pending_key;       /* injected key, consumed at start of end_frame */
+
+	cui_a11y_tree    a11y_tree;
 };
 
+/* Focus ordering: widgets with explicit tab_index sort first; -1 means "use declaration order" (sorts last). */
 typedef struct { char id[CUI_LAST_CLICKED_ID_MAX]; int tab_index; } focusable_t;
 static int focusable_cmp(const void *a, const void *b) {
 	int ta = ((const focusable_t *)a)->tab_index, tb = ((const focusable_t *)b)->tab_index;
@@ -89,19 +109,24 @@ static void build_focusable_list(cui_ctx *ctx, cui_node *root) {
 	if (ctx->focused_index < 0) ctx->focused_index = 0;
 }
 
+/**
+ * Process a single pending key event. Tab/Shift-Tab cycle focus; Enter/Space
+ * synthesize a click on the focused widget (same path as mouse click).
+ * Called at the top of end_frame so the key takes effect this frame.
+ */
 static void process_pending_key(cui_ctx *ctx) {
 	int k = ctx->pending_key;
 	ctx->pending_key = 0;
 	if (ctx->focusable_count <= 0) return;
 	switch (k) {
-	case 0x0100: /* CUI_KEY_TAB */
+	case 0x0100:
 		ctx->focused_index = (ctx->focused_index + 1) % ctx->focusable_count;
 		break;
-	case 0x0101: /* CUI_KEY_SHIFT_TAB */
+	case 0x0101:
 		ctx->focused_index = (ctx->focused_index - 1 + ctx->focusable_count) % ctx->focusable_count;
 		break;
-	case 0x0102: /* CUI_KEY_ENTER */
-	case 0x0103: /* CUI_KEY_SPACE */
+	case 0x0102:
+	case 0x0103:
 		memcpy(ctx->last_clicked_id, ctx->focusable_ids[ctx->focused_index], CUI_LAST_CLICKED_ID_MAX);
 		break;
 	default:
@@ -159,6 +184,11 @@ void cui_begin_frame(cui_ctx *ctx) {
 		ctx->running = ctx->platform->poll_events(ctx->platform_ctx) ? 1 : 0;
 }
 
+/**
+ * Walk the laid-out tree and find which interactive widget (if any) contains
+ * the click coordinates. Last match wins (depth-first), so overlapping widgets
+ * resolve to the deepest/frontmost.
+ */
 static void hit_test_visit(cui_ctx *ctx, cui_node *n) {
 	if (!ctx || !n) return;
 	if ((n->type == CUI_NODE_BUTTON || n->type == CUI_NODE_CHECKBOX || n->type == CUI_NODE_ICON_BUTTON || n->type == CUI_NODE_TEXT_INPUT) && n->button_id &&
@@ -172,6 +202,16 @@ static void hit_test_visit(cui_ctx *ctx, cui_node *n) {
 		hit_test_visit(ctx, c);
 }
 
+/**
+ * End-of-frame pipeline:
+ *   1. Process keyboard input (Tab/Enter)
+ *   2. Diff declared tree against retained tree (state preservation)
+ *   3. Layout pass (measure + position all nodes)
+ *   4. Build focusable list + accessibility tree
+ *   5. Hit-test pending click against laid-out widgets
+ *   6. Generate draw command buffer from visual tree
+ *   7. Submit to RDI for rendering
+ */
 void cui_end_frame(cui_ctx *ctx) {
 	if (!ctx) return;
 	process_pending_key(ctx);
@@ -201,6 +241,9 @@ void *cui_frame_alloc(cui_ctx *ctx, size_t size) {
 	return ctx ? cui_frame_allocator_alloc(&ctx->frame, size) : NULL;
 }
 
+/* Hard cap prevents unbounded allocation from attacker-controlled format strings. */
+#define CUI_FRAME_PRINTF_MAX 65536
+
 const char *cui_frame_printf(cui_ctx *ctx, const char *fmt, ...) {
 	if (!ctx || !fmt) return "";
 	va_list ap;
@@ -208,6 +251,7 @@ const char *cui_frame_printf(cui_ctx *ctx, const char *fmt, ...) {
 	int n = vsnprintf(NULL, 0, fmt, ap);
 	va_end(ap);
 	if (n < 0) return "";
+	if ((size_t)n >= CUI_FRAME_PRINTF_MAX) return "";
 	char *buf = (char *)cui_frame_allocator_alloc(&ctx->frame, (size_t)n + 1);
 	if (!buf) return "";
 	va_start(ap, fmt);
@@ -291,6 +335,7 @@ cui_draw_command_buffer *cui_ctx_scaled_buf(cui_ctx *ctx) {
 	return ctx ? &ctx->scaled_buf : NULL;
 }
 
+/* Inside a canvas block, draw commands go to the canvas buffer; otherwise the main scene buffer. */
 cui_draw_command_buffer *cui_ctx_current_draw_buf(cui_ctx *ctx) {
 	return ctx ? (ctx->canvas_node_for_buf ? &ctx->canvas_cmd_buf : &ctx->draw_buf) : NULL;
 }
@@ -357,6 +402,10 @@ const cui_a11y_tree *cui_ctx_a11y_tree(cui_ctx *ctx) {
 	return ctx ? &ctx->a11y_tree : NULL;
 }
 
+/**
+ * Check-and-clear: if the last click targeted widget `id`, clear the ID and
+ * return 1. Each click is consumed by exactly one widget per frame.
+ */
 int cui_ctx_consume_click(cui_ctx *ctx, const char *id) {
 	if (!ctx || !id || !ctx->last_clicked_id[0]) return 0;
 	if (strcmp(ctx->last_clicked_id, id) != 0) return 0;

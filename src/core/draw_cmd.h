@@ -1,6 +1,13 @@
 #ifndef CLEARUI_DRAW_CMD_H
 #define CLEARUI_DRAW_CMD_H
 
+/**
+ * Draw command buffer: a flat array of tagged-union commands that the RDI
+ * driver consumes each frame. Fixed capacity (set at create); push functions
+ * return -1 when full. Commands reference string pointers that must remain
+ * valid until after RDI submit (the frame allocator guarantees this).
+ */
+
 #include <stddef.h>
 
 typedef enum cui_cmd_type {

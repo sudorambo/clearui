@@ -1,12 +1,24 @@
 /**
  * ClearUI Public API
- * Zero-to-window: cui_create, cui_begin_frame, cui_center/cui_label, cui_end_frame, cui_destroy.
  *
- * All coordinates and sizes (layout, draw) are in logical pixels. Set cui_config.scale_factor
- * from the platform display scale (e.g. 2.0 on Hi-DPI) so the render path can scale to physical pixels.
+ * Declarative immediate-mode GUI: call cui_create once, then each frame call
+ * cui_begin_frame, emit your widget tree, cui_end_frame. The library maintains
+ * an internal retained tree for layout, diffing, accessibility, and rendering.
+ *
+ * All coordinates and sizes are in logical pixels. Set cui_config.scale_factor
+ * from the platform display scale (e.g. 2.0 on Hi-DPI) so the render path can
+ * scale to physical pixels automatically.
+ *
+ * Colors are packed 0xAARRGGBB (alpha in high byte, blue in low byte).
+ *
+ * Thread safety: none. All API calls must happen on a single thread.
  */
 #ifndef CLEARUI_H
 #define CLEARUI_H
+
+#define CUI_VERSION_MAJOR 0
+#define CUI_VERSION_MINOR 1
+#define CUI_VERSION_PATCH 0
 
 #include <stddef.h>
 
@@ -22,20 +34,25 @@ typedef struct cui_rdi_context cui_rdi_context;
 
 typedef struct cui_config {
 	const char *title;
-	int        width;
-	int        height;
-	float      scale_factor;   /* display scale (1.0 = 100%); set from platform for Hi-DPI */
-	size_t     draw_buf_capacity; /* 0 = default 1024; >0 = max draw commands per buffer */
+	int        width;           /* logical window width  (pixels) */
+	int        height;          /* logical window height (pixels) */
+	float      scale_factor;    /* display scale (1.0 = 100%); set from platform for Hi-DPI */
+	size_t     draw_buf_capacity; /* 0 = default 1024; max draw commands per buffer */
 } cui_config;
 
-/* Layout options for row/column/center/stack/wrap. (cui_layout){} is valid. */
+/**
+ * Layout options for container widgets (row/column/center/stack/wrap).
+ * Zero-init is valid: (cui_layout){} gives default gap, no padding, no constraints.
+ * If padding > 0, it sets both padding_x and padding_y (explicit values take priority).
+ */
 typedef struct cui_layout {
-	float gap;
-	float padding;
-	float padding_x, padding_y;
-	float max_width, min_width, max_height, min_height;
-	float flex;
-	int   align, align_y;
+	float gap;                  /* space between children (default: 8px) */
+	float padding;              /* shorthand for padding_x + padding_y */
+	float padding_x, padding_y; /* per-axis inner padding; overrides `padding` if > 0 */
+	float max_width, min_width, max_height, min_height; /* size constraints; 0 = none */
+	float flex;                 /* flex grow factor (reserved for future flex-grow) */
+	int   align;                /* main-axis: CUI_ALIGN_START/CENTER/END/STRETCH */
+	int   align_y;              /* cross-axis alignment (row only) */
 } cui_layout;
 
 #define CUI_ALIGN_START   0
@@ -43,10 +60,13 @@ typedef struct cui_layout {
 #define CUI_ALIGN_END     2
 #define CUI_ALIGN_STRETCH 3
 
-/* Style for text (and optional widget styling). Applied via push_style/pop_style or label_styled. */
+/**
+ * Style for text and optional widget decoration.
+ * Apply via cui_push_style/cui_pop_style (scoped) or cui_label_styled (one-shot).
+ */
 typedef struct cui_style {
-	unsigned int text_color;   /* 0 = use default (black) */
-	int          text_decoration; /* 0=none, 1=strikethrough */
+	unsigned int text_color;      /* 0xAARRGGBB; 0 = default (black) */
+	int          text_decoration; /* CUI_TEXT_DECORATION_NONE or _STRIKETHROUGH */
 } cui_style;
 
 #define CUI_TEXT_DECORATION_NONE 0
@@ -62,9 +82,22 @@ int  cui_running(cui_ctx *ctx);
 void cui_begin_frame(cui_ctx *ctx);
 void cui_end_frame(cui_ctx *ctx);
 
+/**
+ * Persistent state keyed by string. Returns a zero-initialized block of `size`
+ * bytes on first call; same pointer on subsequent calls with the same key.
+ * Pointer is valid for the lifetime of the context.
+ */
 void *cui_state(cui_ctx *ctx, const char *key, size_t size);
-void *cui_frame_alloc(cui_ctx *ctx, size_t size);       /* valid until next cui_begin_frame */
-const char *cui_frame_printf(cui_ctx *ctx, const char *fmt, ...); /* valid until next cui_begin_frame */
+
+/** Per-frame bump allocation. Returned pointer is valid until the next cui_begin_frame. */
+void *cui_frame_alloc(cui_ctx *ctx, size_t size);
+
+/**
+ * sprintf into frame-allocated memory. Returned string is valid until the next
+ * cui_begin_frame. fmt must be application-controlled (not user input) to avoid
+ * format-string risk and unbounded allocation. Max output: 64 KiB.
+ */
+const char *cui_frame_printf(cui_ctx *ctx, const char *fmt, ...);
 
 void cui_push_style(cui_ctx *ctx, const cui_style *style);
 void cui_pop_style(cui_ctx *ctx);
@@ -89,10 +122,10 @@ int  cui_icon_button(cui_ctx *ctx, const char *id, int icon); /* icon: CUI_ICON_
 
 int  cui_text_input(cui_ctx *ctx, const char *id, char *buffer, size_t capacity, const cui_text_input_opts *opts);
 
-/* Canvas: custom drawing; list valid until next cui_begin_frame */
+/** Canvas: custom drawing surface. Coordinates are local to the canvas. Close with cui_end. */
 typedef struct cui_canvas_opts { float width; float height; } cui_canvas_opts;
 void cui_canvas(cui_ctx *ctx, const cui_canvas_opts *opts);
-void cui_draw_rect(cui_ctx *ctx, float x, float y, float w, float h, unsigned int color);
+void cui_draw_rect(cui_ctx *ctx, float x, float y, float w, float h, unsigned int color);   /* color: 0xAARRGGBB */
 void cui_draw_circle(cui_ctx *ctx, float cx, float cy, float r, unsigned int color);
 void cui_draw_text(cui_ctx *ctx, float x, float y, const char *text, unsigned int color);
 #define CUI_ICON_TRASH 1

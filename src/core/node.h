@@ -1,6 +1,12 @@
 #ifndef CLEARUI_NODE_H
 #define CLEARUI_NODE_H
 
+/**
+ * Internal UI tree node. Each widget or container creates one node per frame
+ * via cui_node_alloc (arena-allocated). Children are an intrusive singly-linked
+ * list (first_child + next_sibling) with a last_child pointer for O(1) append.
+ */
+
 #include <stddef.h>
 
 typedef enum cui_node_type {
