@@ -17,6 +17,7 @@ int cui_text_input(cui_ctx *ctx, const char *id, char *buffer, size_t capacity, 
 	if (n->tab_index < 0) n->tab_index = -1;
 	n->text_input_buf = buffer;
 	n->text_input_cap = capacity;
+	n->text_input_cursor = 0; /* diff copies from retained when present */
 	if (opts && opts->placeholder)
 		n->label_text = opts->placeholder;
 	n->layout_w = 120;
@@ -25,5 +26,5 @@ int cui_text_input(cui_ctx *ctx, const char *id, char *buffer, size_t capacity, 
 		cui_node_append_child(parent, n);
 	else if (root && !*root)
 		*root = n;
-	return 0; /* focus/keyboard not implemented in stub */
+	return cui_ctx_consume_text_input_changed(ctx, id);
 }

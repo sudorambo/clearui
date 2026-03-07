@@ -153,7 +153,12 @@ void cui_tab_index(cui_ctx *ctx, int index);
 #define CUI_KEY_SHIFT_TAB 0x0101
 #define CUI_KEY_ENTER     0x0102
 #define CUI_KEY_SPACE     0x0103
+#define CUI_KEY_BACKSPACE 0x0104
+#define CUI_KEY_DELETE    0x0105
 void cui_inject_key(cui_ctx *ctx, int key);
+
+/** Injects one printable character into the focused text input (if any). Codepoint 32–126 (ASCII printable) is inserted at cursor; non-printable is ignored. Processed in end_frame. */
+void cui_inject_char(cui_ctx *ctx, unsigned int codepoint);
 
 #ifdef CUI_DEBUG
 void cui_dev_overlay(cui_ctx *ctx);  /* frame time, node count, arena usage */

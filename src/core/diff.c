@@ -48,21 +48,29 @@ static cui_node *clone_retained_from_declared(const cui_node *declared) {
 	r->checkbox_checked = declared->checkbox_checked;
 	r->text_input_buf = declared->text_input_buf;
 	r->text_input_cap = declared->text_input_cap;
+	r->text_input_cursor = declared->text_input_cursor;
 	r->first_child = r->last_child = r->next_sibling = NULL;
 	return r;
 }
 
-/* Copy persistent state from retained into declared. */
-static void copy_state_retained_to_declared(cui_node *declared, const cui_node *retained) {
+/* Copy persistent state from retained into declared. May clamp retained cursor for TEXT_INPUT. */
+static void copy_state_retained_to_declared(cui_node *declared, cui_node *retained) {
 	if (!declared || !retained) return;
 	switch (retained->type) {
 	case CUI_NODE_SCROLL:
 		declared->scroll_offset_y = retained->scroll_offset_y;
 		break;
-	case CUI_NODE_TEXT_INPUT:
+	case CUI_NODE_TEXT_INPUT: {
 		declared->text_input_buf = retained->text_input_buf;
 		declared->text_input_cap = retained->text_input_cap;
+		int c = retained->text_input_cursor;
+		size_t len = declared->text_input_buf ? strlen(declared->text_input_buf) : 0;
+		if (c < 0) c = 0;
+		if ((size_t)c > len) c = 0; /* buffer shortened: clamp to start so delete-at-start works */
+		declared->text_input_cursor = c;
+		retained->text_input_cursor = c;
 		break;
+	}
 	case CUI_NODE_CHECKBOX:
 		declared->checkbox_checked = retained->checkbox_checked;
 		break;
@@ -136,6 +144,10 @@ static void reconcile(cui_node *declared, cui_node **retained) {
 			r->spacer_w = d->spacer_w;
 			r->spacer_h = d->spacer_h;
 			r->icon_id = d->icon_id;
+			if (d->type == CUI_NODE_TEXT_INPUT) {
+				r->text_input_buf = d->text_input_buf;
+				r->text_input_cap = d->text_input_cap;
+			}
 			r->next_sibling = NULL;
 			reconcile(d, &r);
 			copy_state_retained_to_declared(d, r);

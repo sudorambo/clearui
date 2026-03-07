@@ -20,6 +20,7 @@ Auto-generated from all feature plans. Last updated: 2026-03-07
 - C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (zero external dependencies; uses built-in stub platform + software RDI) (013-api-demo-example)
 - C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (stdlib only; optional vendored stb_truetype for font) (014-security-docs-overflow)
 - N/A (no new persistence; CHANGELOG and docs are versioned in repo) (015-release-hygiene-0.2.0)
+- Retained UI tree (context) holds cursor index per text input; buffer is caller-owned, content in app memory (016-text-input-keyboard-0.3.0)
 
 - C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (zero external dependencies) (002-fix-gitignore)
 
@@ -39,9 +40,9 @@ tests/
 C11 (`-std=c11 -Wall -Wextra -Wpedantic`): Follow standard conventions
 
 ## Recent Changes
+- 016-text-input-keyboard-0.3.0: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (stdlib only; optional vendored stb_truetype for font)
 - 015-release-hygiene-0.2.0: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (stdlib only; optional vendored stb_truetype for font)
 - 014-security-docs-overflow: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (stdlib only; optional vendored stb_truetype for font)
-- 013-api-demo-example: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (zero external dependencies; uses built-in stub platform + software RDI)
 
 
 <!-- MANUAL ADDITIONS START -->

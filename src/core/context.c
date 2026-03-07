@@ -68,6 +68,8 @@ struct cui_ctx {
 	int              next_tab_index;
 	const char      *next_aria_label;
 	int              pending_key;       /* injected key, consumed at start of end_frame */
+	unsigned int     pending_char;      /* injected printable char for focused text input; consumed in end_frame */
+	char             text_input_changed_id[CUI_LAST_CLICKED_ID_MAX]; /* id of text input modified last frame; consumed when cui_text_input returns 1 */
 
 	cui_a11y_tree    a11y_tree;
 };
@@ -79,6 +81,17 @@ static int focusable_cmp(const void *a, const void *b) {
 	if (ta < 0) ta = 9999;
 	if (tb < 0) tb = 9999;
 	return (ta > tb) - (ta < tb);
+}
+
+/* Find a node in the retained tree by button_id (depth-first). */
+static cui_node *retained_node_by_id(cui_node *n, const char *id) {
+	if (!n || !id) return NULL;
+	if (n->button_id && strcmp(n->button_id, id) == 0) return n;
+	for (cui_node *c = n->first_child; c; c = c->next_sibling) {
+		cui_node *found = retained_node_by_id(c, id);
+		if (found) return found;
+	}
+	return NULL;
 }
 
 static void collect_focusable(cui_node *n, focusable_t *list, int *count) {
@@ -129,9 +142,60 @@ static void process_pending_key(cui_ctx *ctx) {
 	case 0x0103:
 		memcpy(ctx->last_clicked_id, ctx->focusable_ids[ctx->focused_index], CUI_LAST_CLICKED_ID_MAX);
 		break;
+	case 0x0104: /* CUI_KEY_BACKSPACE */
+	case 0x0105: /* CUI_KEY_DELETE */ {
+		const char *fid = ctx->focusable_count > 0 && ctx->focused_index >= 0 && ctx->focused_index < ctx->focusable_count
+			? ctx->focusable_ids[ctx->focused_index] : NULL;
+		cui_node *rn = fid && ctx->retained_root ? retained_node_by_id(ctx->retained_root, fid) : NULL;
+		if (rn && rn->type == CUI_NODE_TEXT_INPUT && rn->text_input_buf && rn->text_input_cap > 0) {
+			size_t len = strlen(rn->text_input_buf);
+			int cur = rn->text_input_cursor;
+			if (cur < 0) cur = 0;
+			if ((size_t)cur > len) cur = 0; /* buffer shortened: clamp to start */
+			rn->text_input_cursor = cur;
+			if (k == 0x0104 && cur > 0) {
+				memmove(rn->text_input_buf + (size_t)(cur - 1), rn->text_input_buf + (size_t)cur, (size_t)(len - (size_t)cur + 1));
+				rn->text_input_cursor = cur - 1;
+				memcpy(ctx->text_input_changed_id, fid, strlen(fid) + 1);
+				if (strlen(ctx->text_input_changed_id) >= CUI_LAST_CLICKED_ID_MAX)
+					ctx->text_input_changed_id[CUI_LAST_CLICKED_ID_MAX - 1] = '\0';
+			} else if (k == 0x0105 && (size_t)cur < len) {
+				memmove(rn->text_input_buf + (size_t)cur, rn->text_input_buf + (size_t)cur + 1, len - (size_t)cur);
+				rn->text_input_buf[len - 1] = '\0';
+				memcpy(ctx->text_input_changed_id, fid, strlen(fid) + 1);
+				if (strlen(ctx->text_input_changed_id) >= CUI_LAST_CLICKED_ID_MAX)
+					ctx->text_input_changed_id[CUI_LAST_CLICKED_ID_MAX - 1] = '\0';
+			}
+		}
+		break;
+	}
 	default:
 		break;
 	}
+}
+
+/* Apply one pending printable character to the focused text input. Called after process_pending_key in end_frame. */
+static void apply_pending_char(cui_ctx *ctx) {
+	unsigned int cp = ctx->pending_char;
+	ctx->pending_char = 0;
+	if (cp < 32 || cp > 126) return; /* ASCII printable only */
+	if (ctx->focusable_count <= 0 || ctx->focused_index < 0 || ctx->focused_index >= ctx->focusable_count) return;
+	const char *fid = ctx->focusable_ids[ctx->focused_index];
+	cui_node *rn = ctx->retained_root ? retained_node_by_id(ctx->retained_root, fid) : NULL;
+	if (!rn || rn->type != CUI_NODE_TEXT_INPUT || !rn->text_input_buf || rn->text_input_cap == 0) return;
+	char *buf = rn->text_input_buf;
+	size_t cap = rn->text_input_cap;
+	size_t len = strlen(buf);
+	int cur = rn->text_input_cursor;
+	if (cur < 0) cur = 0;
+	if ((size_t)cur > len) cur = (int)len;
+	if (len >= cap - 1) return; /* full */
+	memmove(buf + (size_t)cur + 1, buf + (size_t)cur, len - (size_t)cur + 1);
+	buf[(size_t)cur] = (char)(cp & 0xFF);
+	rn->text_input_cursor = cur + 1;
+	size_t fid_len = strlen(fid);
+	if (fid_len >= CUI_LAST_CLICKED_ID_MAX) fid_len = CUI_LAST_CLICKED_ID_MAX - 1;
+	memcpy(ctx->text_input_changed_id, fid, fid_len + 1);
 }
 
 cui_ctx *cui_create(const cui_config *config) {
@@ -215,6 +279,7 @@ static void hit_test_visit(cui_ctx *ctx, cui_node *n) {
 void cui_end_frame(cui_ctx *ctx) {
 	if (!ctx) return;
 	process_pending_key(ctx);
+	apply_pending_char(ctx);
 	cui_diff_run(ctx->declared_root, &ctx->retained_root);
 	{
 		float vw = (float)(ctx->config.width > 0 ? ctx->config.width : 400);
@@ -372,6 +437,12 @@ void cui_inject_key(cui_ctx *ctx, int key) {
 	if (ctx) ctx->pending_key = key;
 }
 
+void cui_inject_char(cui_ctx *ctx, unsigned int codepoint) {
+	if (!ctx) return;
+	if (codepoint >= 32 && codepoint <= 126)
+		ctx->pending_char = codepoint;
+}
+
 #ifdef CUI_DEBUG
 static int count_nodes(cui_node *n) {
 	if (!n) return 0;
@@ -410,6 +481,13 @@ int cui_ctx_consume_click(cui_ctx *ctx, const char *id) {
 	if (!ctx || !id || !ctx->last_clicked_id[0]) return 0;
 	if (strcmp(ctx->last_clicked_id, id) != 0) return 0;
 	ctx->last_clicked_id[0] = '\0';
+	return 1;
+}
+
+int cui_ctx_consume_text_input_changed(cui_ctx *ctx, const char *id) {
+	if (!ctx || !id || !ctx->text_input_changed_id[0]) return 0;
+	if (strcmp(ctx->text_input_changed_id, id) != 0) return 0;
+	ctx->text_input_changed_id[0] = '\0';
 	return 1;
 }
 

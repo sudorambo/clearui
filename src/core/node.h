@@ -52,6 +52,7 @@ struct cui_node {
 	int              *checkbox_checked;   /* for CHECKBOX */
 	char             *text_input_buf;     /* for TEXT_INPUT */
 	size_t            text_input_cap;
+	int               text_input_cursor;  /* for TEXT_INPUT: index in [0, strlen(buffer)]; insertion point */
 	float             scroll_offset_y;   /* for SCROLL */
 	float             scroll_max_h;
 	float             spacer_w, spacer_h; /* for SPACER */

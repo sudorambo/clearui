@@ -33,6 +33,8 @@ void             cui_ctx_push_parent(cui_ctx *ctx, cui_node *n);
 void             cui_ctx_pop_parent(cui_ctx *ctx);
 
 int              cui_ctx_consume_click(cui_ctx *ctx, const char *id);
+/** If the last text input modified was this id, clear it and return 1; else return 0. */
+int              cui_ctx_consume_text_input_changed(cui_ctx *ctx, const char *id);
 
 const cui_style  *cui_ctx_current_style(cui_ctx *ctx);
 

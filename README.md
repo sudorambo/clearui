@@ -204,8 +204,10 @@ cui_pop_style(ctx);
 ```c
 cui_tab_index(ctx, 1);                   // explicit tab order for next widget
 cui_aria_label(ctx, "Close dialog");     // screen reader label for next widget
-cui_inject_key(ctx, CUI_KEY_TAB);       // programmatic focus control
+cui_inject_key(ctx, CUI_KEY_TAB);        // programmatic focus control
 ```
+
+For the focused text input, use `cui_inject_char(ctx, codepoint)` to insert printable characters (e.g. ASCII 32–126) at the cursor, and `cui_inject_key(ctx, CUI_KEY_BACKSPACE)` or `cui_inject_key(ctx, CUI_KEY_DELETE)` to remove the character before or at the cursor. `cui_text_input` returns **1** when that widget’s buffer was modified in the previous frame (insert or backspace/delete), **0** otherwise.
 
 Focus indicators follow WCAG 2.1 AA. The internal accessibility tree exposes roles, labels, and composable state (`"checked"`, `"focused"`, `"checked focused"`) for platform screen reader integration.
 
