@@ -1,0 +1,32 @@
+# Build artifacts (C)
+build/
+bin/
+obj/
+out/
+*.o
+*.a
+*.so
+*.dll
+*.exe
+*.out
+*.dylib
+autom4te.cache/
+config.status
+config.log
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Logs and env
+*.log
+.env
+.env.*
+
+# Optional: clang-format config lives in repo; ignore local overrides if any
+# (none)

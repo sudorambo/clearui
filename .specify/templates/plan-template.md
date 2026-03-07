@@ -31,7 +31,16 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+Verify against `.specify/memory/constitution.md`:
+
+- [ ] **Clarity**: No hidden allocations, macro magic, or implicit global state; API readable as pseudocode.
+- [ ] **Ownership**: Memory model (arena / frame allocator / Vault) respected; no `free()` on UI nodes.
+- [ ] **Zero-to-Window**: Build and first-run remain single-command / under 5 min where applicable.
+- [ ] **C99/C11**: No C++, no compiler extensions; optional deps (e.g. HarfBuzz) documented.
+- [ ] **Performance**: 60fps target, GPU-friendly pipeline, layout cost acceptable.
+- [ ] **Beautiful & Accessible**: Defaults and a11y (keyboard, screen readers, WCAG 2.1 AA) not degraded.
+- [ ] **Tech constraints**: RDI/platform abstraction and API surface cap (~120 functions) respected.
+- [ ] **Layers**: Four-layer architecture; dependencies flow downward only.
 
 ## Project Structure
 

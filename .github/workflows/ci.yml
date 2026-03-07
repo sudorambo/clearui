@@ -1,0 +1,27 @@
+# Tier 1: build and run unit + integration tests on every push/PR
+name: CI
+
+on:
+  push:
+    branches: [main, 001-clearui-core]
+  pull_request:
+    branches: [main, 001-clearui-core]
+
+jobs:
+  build-and-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build
+        run: make all
+
+      - name: Unit tests
+        run: make unit-tests
+
+      - name: Integration tests
+        run: make integration-tests
