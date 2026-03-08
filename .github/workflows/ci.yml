@@ -58,8 +58,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build and unit tests
-        run: make unit-tests
-
-      - name: Leak check (Valgrind)
-        run: make leak-check
+      - name: Leak check (LeakSanitizer)
+        run: make leak-check-lsan
