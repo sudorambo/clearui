@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0] - 2026-03-08
 
+**ClearUI 1.0.0 — Official Release.**
+
+All nine milestones (0.2.0–0.10.0) complete. 24 unit tests, 5 integration tests, ASan, UBSan, and LeakSanitizer clean on Linux, macOS, and Windows. SDL3 platform backend and software render driver ship. API frozen — no breaking changes until 2.0.
+
 ### Added
 
 - **Stable release**: First stable version of ClearUI. All milestones 0.2.0–0.10.0 complete.
@@ -17,14 +21,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Version**: `CUI_VERSION_MAJOR.MINOR.PATCH` set to 1.0.0. `cui_version_string()` returns `"1.0.0"`.
 - **API frozen**: Public API locked as of 0.10.0; no breaking changes until 2.0.
-
-### Fixed
-
-### Deprecated
-
-### Removed
-
-### Security
 
 ## [0.10.0] - 2026-03-07
 
