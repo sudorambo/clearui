@@ -105,6 +105,10 @@ include/
   clearui_platform.h     # platform adapter interface
   clearui_rdi.h          # render driver interface
 
+docs/
+  API.md                 # API reference (list of public functions)
+  MIGRATION.md           # upgrade notes 0.2.0 → 0.10.0
+
 examples/
   demo.c                 # full API reference (make demo && ./demo)
 
@@ -182,7 +186,7 @@ cui_scroll(ctx, NULL, &(cui_scroll_opts){ .max_height = 200 }); // scrollable (i
 ```c
 typedef struct cui_layout {
     float gap;                            // space between children
-    float padding, padding_x, padding_y;  // inner padding
+    float padding, padding_x, padding_y;   // inner padding: padding_x/y override padding when > 0
     float min_width, max_width;           // size constraints
     float min_height, max_height;
     float flex;                           // flex grow factor
@@ -190,6 +194,8 @@ typedef struct cui_layout {
     int   align_y;  // cross-axis alignment
 } cui_layout;
 ```
+
+Use `padding` for uniform padding, or `padding_x` / `padding_y` for per-axis; explicit `padding_x` or `padding_y` override `padding` when greater than 0.
 
 ## Canvas (custom drawing)
 
@@ -308,6 +314,8 @@ clang-format -i path/to/file.c
 The repo root contains `.clang-format`; use it for consistent style.
 
 Design documents and feature specs live under `specs/`. The project constitution is at `.specify/memory/constitution.md`.
+
+**API freeze**: The public API is frozen as of 0.10.0. There will be no breaking changes until 1.0; new APIs will be additive only.
 
 ## License
 

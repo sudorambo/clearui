@@ -4,6 +4,7 @@
 #include "../../include/clearui.h"
 #include <string.h>
 
+/* Padding resolution per contract: effective_x = padding_x > 0 ? padding_x : padding; same for y. */
 static void copy_layout_opts(cui_node_layout *dst, const cui_layout *src) {
 	memset(dst, 0, sizeof(*dst));
 	if (!src) return;

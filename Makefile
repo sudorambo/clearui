@@ -14,7 +14,7 @@ SDL3_LDFLAGS := -lSDL3
 endif
 
 # Sources (expand as implementation grows)
-CORE_SRCS := src/core/arena.c src/core/frame_alloc.c src/core/vault.c src/core/utf8.c src/core/context.c \
+CORE_SRCS := src/core/arena.c src/core/frame_alloc.c src/core/vault.c src/core/utf8.c src/core/version.c src/core/context.c \
 	src/core/draw_cmd.c src/core/node.c src/core/diff.c src/core/render.c src/core/a11y.c
 FONT_SRCS := src/font/atlas.c
 LAYOUT_SRCS := src/layout/layout.c
@@ -167,4 +167,8 @@ leak-check-lsan: unit-tests
 	$(MAKE) -s unit-tests CFLAGS="$(CFLAGS) -fsanitize=leak -g" LDFLAGS="$(LDFLAGS) -fsanitize=leak"
 	@echo "LeakSanitizer run passed (no leaks reported)."
 
-.PHONY: all lib clean unit-tests integration-tests demo asan ubsan fuzz-utf8 fuzz-vault fuzz-frame stress leak-check leak-check-lsan
+# API reference (Markdown); optional: install Doxygen and add a Doxyfile for HTML
+docs: docs/API.md
+	@echo "API reference: docs/API.md (see also include/clearui.h)"
+
+.PHONY: all lib clean unit-tests integration-tests demo asan ubsan fuzz-utf8 fuzz-vault fuzz-frame stress leak-check leak-check-lsan docs

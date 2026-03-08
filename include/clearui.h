@@ -31,8 +31,11 @@
 #define CLEARUI_H
 
 #define CUI_VERSION_MAJOR 0
-#define CUI_VERSION_MINOR 2
+#define CUI_VERSION_MINOR 10
 #define CUI_VERSION_PATCH 0
+
+/** Runtime version string (e.g. "0.10.0"). Matches CUI_VERSION_MAJOR.MINOR.PATCH. Not thread-safe. */
+const char *cui_version_string(void);
 
 #include <stddef.h>
 
@@ -69,12 +72,14 @@ typedef struct cui_config {
 /**
  * Layout options for container widgets (row/column/center/stack/wrap).
  * Zero-init is valid: (cui_layout){} gives default gap, no padding, no constraints.
- * If padding > 0, it sets both padding_x and padding_y (explicit values take priority).
+ * Padding: if padding_x or padding_y is greater than 0, they override padding for that axis;
+ * otherwise padding sets both. So: effective_x = padding_x > 0 ? padding_x : padding;
+ * effective_y = padding_y > 0 ? padding_y : padding.
  */
 typedef struct cui_layout {
 	float gap;                  /* space between children (default: 8px) */
-	float padding;              /* shorthand for padding_x + padding_y */
-	float padding_x, padding_y; /* per-axis inner padding; overrides `padding` if > 0 */
+	float padding;              /* shorthand for both axes when padding_x/padding_y are 0 */
+	float padding_x, padding_y; /* per-axis inner padding; override padding when > 0 */
 	float max_width, min_width, max_height, min_height; /* size constraints; 0 = none */
 	float flex;                 /* flex grow factor (reserved for future flex-grow) */
 	int   align;                /* main-axis: CUI_ALIGN_START/CENTER/END/STRETCH */

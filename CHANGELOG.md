@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-03-07
+
+### Added
+
+- **Runtime version string**: `cui_version_string(void)` returns the library version at runtime (e.g. `"0.10.0"`), matching `CUI_VERSION_MAJOR.MINOR.PATCH`. Implemented in `src/core/version.c`; not thread-safe.
+- **API reference**: `docs/API.md` lists all public functions and types from `clearui.h`, `clearui_platform.h`, and `clearui_rdi.h`. `make docs` prints the path.
+- **Migration guide**: `docs/MIGRATION.md` documents breaking and notable API changes from 0.2.0 through 0.10.0 with upgrade notes (e.g. `cui_scroll` id, `poll_events` second arg, `cui_layout_run` ctx).
+- **API freeze**: Public API is frozen as of 0.10.0; no breaking changes until 1.0. Documented in README Contributing section.
+
+### Changed
+
+- **Layout padding documentation**: `cui_layout` comment and README now state that `padding_x` / `padding_y` override `padding` when &gt; 0; otherwise `padding` applies to both axes. Behavior unchanged; layout code already matched this contract.
+- **Version**: `CUI_VERSION_MAJOR.MINOR.PATCH` set to 0.10.0.
+
+### Fixed
+
+### Deprecated
+
+### Removed
+
+### Security
+
 ## [0.9.0] - 2026-03-07
 
 ### Added
