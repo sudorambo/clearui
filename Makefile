@@ -32,8 +32,8 @@ test_arena: tests/unit/test_arena.c src/core/arena.c
 	$(CC) $(CFLAGS) -o $@ tests/unit/test_arena.c src/core/arena.c $(LDFLAGS)
 test_vault: tests/unit/test_vault.c src/core/vault.c
 	$(CC) $(CFLAGS) -o $@ tests/unit/test_vault.c src/core/vault.c $(LDFLAGS)
-test_layout: tests/unit/test_layout.c src/core/arena.c src/core/node.c src/layout/layout.c src/font/atlas.c
-	$(CC) $(CFLAGS) -o $@ tests/unit/test_layout.c src/core/arena.c src/core/node.c src/layout/layout.c src/font/atlas.c $(LDFLAGS)
+test_layout: tests/unit/test_layout.c src/core/arena.o src/core/frame_alloc.o src/core/vault.o src/core/node.o src/core/diff.o src/core/draw_cmd.o src/core/render.o src/core/a11y.o src/core/context.o src/layout/layout.o src/font/atlas.o
+	$(CC) $(CFLAGS) -o $@ tests/unit/test_layout.c src/core/arena.o src/core/frame_alloc.o src/core/vault.o src/core/node.o src/core/diff.o src/core/draw_cmd.o src/core/render.o src/core/a11y.o src/core/context.o src/layout/layout.o src/font/atlas.o $(LDFLAGS)
 test_font: tests/unit/test_font.c src/font/atlas.c
 	$(CC) $(CFLAGS) -o $@ tests/unit/test_font.c src/font/atlas.c $(LDFLAGS)
 test_draw_buf: $(OBJS) tests/unit/test_draw_buf.c
@@ -70,8 +70,10 @@ test_scale_buf: $(OBJS) tests/unit/test_scale_buf.c
 	$(CC) $(CFLAGS) -o $@ tests/unit/test_scale_buf.c $(OBJS) $(LDFLAGS)
 test_edge_cases: $(OBJS) tests/unit/test_edge_cases.c
 	$(CC) $(CFLAGS) -o $@ tests/unit/test_edge_cases.c $(OBJS) $(LDFLAGS)
-unit-tests: test_arena test_vault test_layout test_font test_draw_buf test_diff test_frame_alloc test_draw_cmd test_a11y test_focus test_text_input test_scroll test_canvas_draw test_label_styled test_spacer test_wrap test_stack test_style_stack test_cui_frame_alloc test_scale_buf test_edge_cases
-	./test_arena && ./test_vault && ./test_layout && ./test_font && ./test_draw_buf && ./test_diff && ./test_frame_alloc && ./test_draw_cmd && ./test_a11y && ./test_focus && ./test_text_input && ./test_scroll && ./test_canvas_draw && ./test_label_styled && ./test_spacer && ./test_wrap && ./test_stack && ./test_style_stack && ./test_cui_frame_alloc && ./test_scale_buf && ./test_edge_cases
+test_theme: $(OBJS) tests/unit/test_theme.c
+	$(CC) $(CFLAGS) -o $@ tests/unit/test_theme.c $(OBJS) $(LDFLAGS)
+unit-tests: test_arena test_vault test_layout test_font test_draw_buf test_diff test_frame_alloc test_draw_cmd test_a11y test_focus test_text_input test_scroll test_canvas_draw test_label_styled test_spacer test_wrap test_stack test_style_stack test_cui_frame_alloc test_scale_buf test_edge_cases test_theme
+	./test_arena && ./test_vault && ./test_layout && ./test_font && ./test_draw_buf && ./test_diff && ./test_frame_alloc && ./test_draw_cmd && ./test_a11y && ./test_focus && ./test_text_input && ./test_scroll && ./test_canvas_draw && ./test_label_styled && ./test_spacer && ./test_wrap && ./test_stack && ./test_style_stack && ./test_cui_frame_alloc && ./test_scale_buf && ./test_edge_cases && ./test_theme
 
 # Integration tests
 test_hello: $(OBJS) tests/integration/test_hello.c
@@ -98,7 +100,7 @@ clean:
 	rm -f $(OBJS) build/*.o build/*.a libclearui.a hello counter demo \
 		test_arena test_vault test_layout test_font test_draw_buf test_diff \
 		test_frame_alloc test_draw_cmd test_a11y test_focus test_text_input test_scroll \
-		test_canvas_draw test_label_styled test_spacer test_wrap test_stack test_style_stack test_cui_frame_alloc test_scale_buf test_edge_cases \
+		test_canvas_draw test_label_styled test_spacer test_wrap test_stack test_style_stack test_cui_frame_alloc test_scale_buf test_edge_cases test_theme \
 		test_hello test_counter test_rdi_platform test_text_input_edit test_scroll_region 2>/dev/null; true
 
 # Sanitizer builds (recompile everything with sanitizer flags)

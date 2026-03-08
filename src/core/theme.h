@@ -2,8 +2,9 @@
 #define CLEARUI_THEME_H
 
 /**
- * Default theme: colors, corner radii, font size.
- * Applied when no style override is set on a node.
+ * Default theme constants: used only to initialize the built-in default theme
+ * (e.g. in context.c) and for fallbacks. Runtime theme is set via cui_set_theme;
+ * draw and layout read from cui_ctx_theme(ctx).
  */
 #define CUI_THEME_DEFAULT_TEXT_COLOR      0xff000000u
 #define CUI_THEME_DEFAULT_BUTTON_BG      0xffe0e0e0u

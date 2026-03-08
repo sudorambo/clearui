@@ -48,6 +48,9 @@ const char       *cui_ctx_focused_id(cui_ctx *ctx);
 const char       *cui_ctx_take_aria_label(cui_ctx *ctx);
 int               cui_ctx_take_tab_index(cui_ctx *ctx);
 
+/** Current theme for draw/layout. Never NULL (returns static default if ctx is NULL). */
+const cui_theme *cui_ctx_theme(cui_ctx *ctx);
+
 cui_node        *cui_ctx_declared_root(cui_ctx *ctx);
 cui_node        *cui_ctx_retained_root(cui_ctx *ctx);
 void             cui_ctx_build_a11y(cui_ctx *ctx);

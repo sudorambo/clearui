@@ -80,7 +80,7 @@ Requires a C11 compiler. Nothing else.
 ```bash
 make all                # compile all objects
 make lib                # build libclearui.a
-make unit-tests         # run 21 unit tests
+make unit-tests         # run 22 unit tests
 make integration-tests  # run 5 integration tests
 make clean              # remove artifacts
 ```
@@ -111,10 +111,10 @@ src/
   rdi/                   # software RDI stub (swap for Vulkan, Metal, WebGPU)
 
 tests/
-  unit/                  # 21 tests: arena, vault, layout, font, draw_buf, diff,
+  unit/                  # 22 tests: arena, vault, layout, font, draw_buf, diff,
                          #           frame_alloc, draw_cmd, a11y, focus, text_input,
                          #           scroll, canvas_draw, label_styled, spacer, wrap,
-                         #           stack, style_stack, cui_frame_alloc, scale_buf, edge_cases
+                         #           stack, style_stack, cui_frame_alloc, scale_buf, edge_cases, theme
   integration/           # 5 tests:  hello, counter, rdi_platform, text_input_edit, scroll_region
 ```
 
@@ -192,6 +192,25 @@ cui_canvas(ctx, &(cui_canvas_opts){ .width = 200, .height = 200 });
     cui_draw_text(ctx, 10, 180, "hello", 0xff000000);
 cui_end(ctx);
 ```
+
+## Theming
+
+The default look (colors, corner radius, font size, focus ring) is stored in a **runtime theme**. Set it with `cui_set_theme(ctx, &theme)`; pass `NULL` to reset to the built-in default. The library copies the struct, so you can use stack or static storage.
+
+```c
+cui_theme t;
+t.text_color = 0xff000000u;
+t.button_bg = 0xffe0e0e0u;
+t.checkbox_bg = 0xffffffffu;
+t.input_bg = 0xffffffffu;
+t.corner_radius = 4.f;
+t.font_size = 16;
+t.focus_ring_color = 0xff0066ccu;
+t.focus_ring_width = 2.f;
+cui_set_theme(ctx, &t);
+```
+
+For a dark preset, call `cui_theme_dark(&t)` to fill `t`, then `cui_set_theme(ctx, &t)`.
 
 ## Styling
 

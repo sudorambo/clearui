@@ -84,6 +84,22 @@ typedef struct cui_style {
 #define CUI_TEXT_DECORATION_NONE 0
 #define CUI_TEXT_DECORATION_STRIKETHROUGH 1
 
+/** Runtime theme: default colors, corner radius, font size, focus ring. Set via cui_set_theme; NULL resets to built-in default. */
+typedef struct cui_theme {
+	unsigned int text_color;
+	unsigned int button_bg;
+	unsigned int checkbox_bg;
+	unsigned int input_bg;
+	float        corner_radius;
+	int          font_size;
+	unsigned int focus_ring_color;
+	float        focus_ring_width;
+} cui_theme;
+
+void cui_set_theme(cui_ctx *ctx, const cui_theme *theme);
+/** Fills *out with a dark theme (dark backgrounds, light text). Call cui_set_theme(ctx, out) to apply. */
+void cui_theme_dark(cui_theme *out);
+
 cui_ctx *cui_create(const cui_config *config);
 void     cui_destroy(cui_ctx *ctx);
 

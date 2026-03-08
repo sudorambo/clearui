@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-03-07
+
+### Added
+
+- **Runtime theming**: `cui_theme` struct (text_color, button_bg, checkbox_bg, input_bg, corner_radius, font_size, focus_ring_color, focus_ring_width). Set via `cui_set_theme(ctx, &theme)`; pass `NULL` to reset to the built-in default. The library copies the struct; draw and layout use the current theme from context.
+- `cui_theme_dark(cui_theme *out)` — fills `*out` with a dark preset (dark backgrounds, light text); call `cui_set_theme(ctx, out)` to apply.
+- Unit test `test_theme` — asserts custom theme affects draw command colors and `cui_set_theme(ctx, NULL)` restores default.
+- README: new **Theming** section (cui_theme, cui_set_theme, reset, dark preset).
+
+### Changed
+
+- **API**: `cui_layout_run(root, viewport_w, viewport_h)` → `cui_layout_run(ctx, root, viewport_w, viewport_h)`. Layout uses `cui_ctx_theme(ctx)->font_size` when `ctx` is non-NULL; pass `NULL` for headless/tests to use default font size (16).
+- Draw path and layout no longer use compile-time `CUI_THEME_*` macros at runtime; all theme reads go through `cui_ctx_theme(ctx)`. `src/core/theme.h` remains only for default initializer and fallback.
+
+### Fixed
+
+### Deprecated
+
+### Removed
+
+### Security
+
 ## [0.5.0] - 2026-03-07
 
 ### Added

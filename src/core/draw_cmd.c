@@ -14,22 +14,21 @@
 
 #define DECO_STRIKETHROUGH 1
 
-static void push_focus_ring(cui_draw_command_buffer *buf, float x, float y, float w, float h, float ox, float oy) {
-	float t = CUI_THEME_FOCUS_RING_WIDTH;
+static void push_focus_ring(cui_draw_command_buffer *buf, float x, float y, float w, float h, float ox, float oy, float ring_width, unsigned int ring_color) {
 	float x0 = x + ox, y0 = y + oy;
-	cui_draw_buf_push_line(buf, x0, y0, x0 + w, y0, t, CUI_THEME_FOCUS_RING_COLOR);
-	cui_draw_buf_push_line(buf, x0 + w, y0, x0 + w, y0 + h, t, CUI_THEME_FOCUS_RING_COLOR);
-	cui_draw_buf_push_line(buf, x0 + w, y0 + h, x0, y0 + h, t, CUI_THEME_FOCUS_RING_COLOR);
-	cui_draw_buf_push_line(buf, x0, y0 + h, x0, y0, t, CUI_THEME_FOCUS_RING_COLOR);
+	cui_draw_buf_push_line(buf, x0, y0, x0 + w, y0, ring_width, ring_color);
+	cui_draw_buf_push_line(buf, x0 + w, y0, x0 + w, y0 + h, ring_width, ring_color);
+	cui_draw_buf_push_line(buf, x0 + w, y0 + h, x0, y0 + h, ring_width, ring_color);
+	cui_draw_buf_push_line(buf, x0, y0 + h, x0, y0, ring_width, ring_color);
 }
 
-static unsigned int node_text_color(const cui_node *n) {
-	return n->text_color ? n->text_color : CUI_THEME_DEFAULT_TEXT_COLOR;
+static unsigned int node_text_color(const cui_node *n, const cui_theme *th) {
+	return n->text_color ? n->text_color : th->text_color;
 }
 
-static void emit_label(cui_node *root, cui_draw_command_buffer *buf, float ox, float oy) {
+static void emit_label(cui_node *root, cui_draw_command_buffer *buf, float ox, float oy, const cui_theme *th) {
 	if (!root->label_text) return;
-	unsigned int color = node_text_color(root);
+	unsigned int color = node_text_color(root, th);
 	cui_draw_buf_push_text(buf, root->layout_x + ox, root->layout_y + oy, root->label_text, color);
 	if (root->text_decoration == DECO_STRIKETHROUGH) {
 		float mid_y = root->layout_y + root->layout_h / 2 + oy;
@@ -67,27 +66,28 @@ static void replay_canvas_buf(cui_draw_command_buffer *dst, const cui_draw_comma
 void cui_build_draw_from_tree(cui_ctx *ctx, cui_node *root, cui_draw_command_buffer *buf, float offset_x, float offset_y) {
 	if (!root || !buf) return;
 	float ox = offset_x, oy = offset_y;
+	const cui_theme *th = cui_ctx_theme(ctx);
 	const char *focused_id = ctx ? cui_ctx_focused_id(ctx) : NULL;
 	int is_focused = (focused_id && root->button_id && strcmp(root->button_id, focused_id) == 0);
 
-	if (root->type == CUI_NODE_LABEL) emit_label(root, buf, ox, oy);
+	if (root->type == CUI_NODE_LABEL) emit_label(root, buf, ox, oy, th);
 	if (root->type == CUI_NODE_BUTTON) {
-		cui_draw_buf_push_rect(buf, root->layout_x + ox, root->layout_y + oy, root->layout_w, root->layout_h, CUI_THEME_DEFAULT_BUTTON_BG);
+		cui_draw_buf_push_rect(buf, root->layout_x + ox, root->layout_y + oy, root->layout_w, root->layout_h, th->button_bg);
 		if (root->label_text)
-			cui_draw_buf_push_text(buf, root->layout_x + ox + 4, root->layout_y + oy + 4, root->label_text, node_text_color(root));
-		if (is_focused) push_focus_ring(buf, root->layout_x, root->layout_y, root->layout_w, root->layout_h, ox, oy);
+			cui_draw_buf_push_text(buf, root->layout_x + ox + 4, root->layout_y + oy + 4, root->label_text, node_text_color(root, th));
+		if (is_focused) push_focus_ring(buf, root->layout_x, root->layout_y, root->layout_w, root->layout_h, ox, oy, th->focus_ring_width, th->focus_ring_color);
 	}
 	if (root->type == CUI_NODE_CHECKBOX) {
-		cui_draw_buf_push_rect(buf, root->layout_x + ox, root->layout_y + oy, root->layout_w, root->layout_h, CUI_THEME_DEFAULT_CHECKBOX_BG);
+		cui_draw_buf_push_rect(buf, root->layout_x + ox, root->layout_y + oy, root->layout_w, root->layout_h, th->checkbox_bg);
 		if (root->label_text)
-			cui_draw_buf_push_text(buf, root->layout_x + ox + 2, root->layout_y + oy + 2, root->label_text, node_text_color(root));
-		if (is_focused) push_focus_ring(buf, root->layout_x, root->layout_y, root->layout_w, root->layout_h, ox, oy);
+			cui_draw_buf_push_text(buf, root->layout_x + ox + 2, root->layout_y + oy + 2, root->label_text, node_text_color(root, th));
+		if (is_focused) push_focus_ring(buf, root->layout_x, root->layout_y, root->layout_w, root->layout_h, ox, oy, th->focus_ring_width, th->focus_ring_color);
 	}
 	if (root->type == CUI_NODE_ICON_BUTTON) {
-		cui_draw_buf_push_rect(buf, root->layout_x + ox, root->layout_y + oy, root->layout_w, root->layout_h, CUI_THEME_DEFAULT_BUTTON_BG);
+		cui_draw_buf_push_rect(buf, root->layout_x + ox, root->layout_y + oy, root->layout_w, root->layout_h, th->button_bg);
 		if (root->label_text)
-			cui_draw_buf_push_text(buf, root->layout_x + ox + 4, root->layout_y + oy + 4, root->label_text, node_text_color(root));
-		if (is_focused) push_focus_ring(buf, root->layout_x, root->layout_y, root->layout_w, root->layout_h, ox, oy);
+			cui_draw_buf_push_text(buf, root->layout_x + ox + 4, root->layout_y + oy + 4, root->label_text, node_text_color(root, th));
+		if (is_focused) push_focus_ring(buf, root->layout_x, root->layout_y, root->layout_w, root->layout_h, ox, oy, th->focus_ring_width, th->focus_ring_color);
 	}
 	if (root->type == CUI_NODE_SCROLL) {
 		float child_oy = oy + root->layout_y - root->scroll_offset_y;
@@ -96,10 +96,10 @@ void cui_build_draw_from_tree(cui_ctx *ctx, cui_node *root, cui_draw_command_buf
 		return;
 	}
 	if (root->type == CUI_NODE_TEXT_INPUT) {
-		cui_draw_buf_push_rect(buf, root->layout_x + ox, root->layout_y + oy, root->layout_w, root->layout_h, CUI_THEME_DEFAULT_INPUT_BG);
+		cui_draw_buf_push_rect(buf, root->layout_x + ox, root->layout_y + oy, root->layout_w, root->layout_h, th->input_bg);
 		if (root->text_input_buf && root->text_input_cap > 0)
-			cui_draw_buf_push_text(buf, root->layout_x + ox + 4, root->layout_y + oy + 4, root->text_input_buf, CUI_THEME_DEFAULT_TEXT_COLOR);
-		if (is_focused) push_focus_ring(buf, root->layout_x, root->layout_y, root->layout_w, root->layout_h, ox, oy);
+			cui_draw_buf_push_text(buf, root->layout_x + ox + 4, root->layout_y + oy + 4, root->text_input_buf, th->text_color);
+		if (is_focused) push_focus_ring(buf, root->layout_x, root->layout_y, root->layout_w, root->layout_h, ox, oy, th->focus_ring_width, th->focus_ring_color);
 	}
 	if (ctx && root->type == CUI_NODE_CANVAS) {
 		replay_canvas_buf(buf, cui_ctx_canvas_buf(ctx), root->layout_x + ox, root->layout_y + oy);

@@ -13,6 +13,7 @@
 #include "draw_cmd.h"
 #include "diff.h"
 #include "node.h"
+#include "theme.h"
 #include "../layout/layout.h"
 #include "render.h"
 #include "a11y.h"
@@ -76,6 +77,7 @@ struct cui_ctx {
 	char             hovered_id[CUI_LAST_CLICKED_ID_MAX];
 	int              pending_scroll_dx, pending_scroll_dy;
 
+	cui_theme        theme;             /* current theme; draw/layout read via cui_ctx_theme */
 	cui_a11y_tree    a11y_tree;
 };
 
@@ -207,6 +209,14 @@ cui_ctx *cui_create(const cui_config *config) {
 	cui_ctx *ctx = (cui_ctx *)malloc(sizeof(cui_ctx));
 	if (!ctx) return NULL;
 	memset(ctx, 0, sizeof(cui_ctx));
+	ctx->theme.text_color = CUI_THEME_DEFAULT_TEXT_COLOR;
+	ctx->theme.button_bg = CUI_THEME_DEFAULT_BUTTON_BG;
+	ctx->theme.checkbox_bg = CUI_THEME_DEFAULT_CHECKBOX_BG;
+	ctx->theme.input_bg = CUI_THEME_DEFAULT_INPUT_BG;
+	ctx->theme.corner_radius = CUI_THEME_DEFAULT_CORNER_RADIUS;
+	ctx->theme.font_size = CUI_THEME_DEFAULT_FONT_SIZE;
+	ctx->theme.focus_ring_color = CUI_THEME_FOCUS_RING_COLOR;
+	ctx->theme.focus_ring_width = CUI_THEME_FOCUS_RING_WIDTH;
 	cui_arena_init(&ctx->arena, CUI_ARENA_DEFAULT);
 	cui_frame_allocator_init(&ctx->frame, 0);
 	ctx->vault = cui_vault_create(0);
@@ -353,7 +363,7 @@ void cui_end_frame(cui_ctx *ctx) {
 	{
 		float vw = (float)(ctx->config.width > 0 ? ctx->config.width : 400);
 		float vh = (float)(ctx->config.height > 0 ? ctx->config.height : 300);
-		cui_layout_run(ctx->declared_root, vw, vh);
+		cui_layout_run(ctx, ctx->declared_root, vw, vh);
 	}
 	ctx->hovered_id[0] = '\0';
 	hover_hit_test_visit(ctx, ctx->declared_root);
@@ -442,6 +452,44 @@ void cui_destroy(cui_ctx *ctx) {
 	cui_frame_allocator_free(&ctx->frame);
 	cui_arena_free(&ctx->arena);
 	free(ctx);
+}
+
+static void theme_set_default(cui_theme *t) {
+	t->text_color = CUI_THEME_DEFAULT_TEXT_COLOR;
+	t->button_bg = CUI_THEME_DEFAULT_BUTTON_BG;
+	t->checkbox_bg = CUI_THEME_DEFAULT_CHECKBOX_BG;
+	t->input_bg = CUI_THEME_DEFAULT_INPUT_BG;
+	t->corner_radius = CUI_THEME_DEFAULT_CORNER_RADIUS;
+	t->font_size = CUI_THEME_DEFAULT_FONT_SIZE;
+	t->focus_ring_color = CUI_THEME_FOCUS_RING_COLOR;
+	t->focus_ring_width = CUI_THEME_FOCUS_RING_WIDTH;
+}
+
+void cui_set_theme(cui_ctx *ctx, const cui_theme *theme) {
+	if (!ctx) return;
+	if (theme)
+		ctx->theme = *theme;
+	else
+		theme_set_default(&ctx->theme);
+}
+
+const cui_theme *cui_ctx_theme(cui_ctx *ctx) {
+	static cui_theme fallback;
+	static int once;
+	if (!once) { theme_set_default(&fallback); once = 1; }
+	return ctx ? &ctx->theme : &fallback;
+}
+
+void cui_theme_dark(cui_theme *out) {
+	if (!out) return;
+	out->text_color = 0xffe0e0e0u;
+	out->button_bg = 0xff404040u;
+	out->checkbox_bg = 0xff505050u;
+	out->input_bg = 0xff505050u;
+	out->corner_radius = CUI_THEME_DEFAULT_CORNER_RADIUS;
+	out->font_size = CUI_THEME_DEFAULT_FONT_SIZE;
+	out->focus_ring_color = CUI_THEME_FOCUS_RING_COLOR;
+	out->focus_ring_width = CUI_THEME_FOCUS_RING_WIDTH;
 }
 
 void cui_set_platform(cui_ctx *ctx, const cui_platform *platform, cui_platform_ctx *platform_ctx) {
