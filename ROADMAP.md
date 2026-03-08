@@ -1,183 +1,151 @@
-# ClearUI Roadmap to 1.0.0
+# ClearUI Roadmap
 
-Current version: **0.1.0** (alpha)
+**Current version: 1.0.0 (stable)**
 
-This document tracks the work required to reach a stable 1.0.0 release. Items are grouped into milestones roughly ordered by priority. Each milestone can ship as a minor version bump (0.2.0, 0.3.0, ...) on the way to 1.0.
-
----
-
-## Milestone 1: Release Hygiene (0.2.0)
-
-Foundational items that every release needs. No functional changes.
-
-- [ ] Add `CUI_VERSION_MAJOR/MINOR/PATCH` macros to `clearui.h` (done in 0.1.0 prep)
-- [ ] Create `CHANGELOG.md` and adopt [Keep a Changelog](https://keepachangelog.com/) format
-- [ ] Document color format (`0xAARRGGBB`) in public header and README
-- [ ] Document single-threaded contract in public header and README
-- [ ] Document fixed limits and their silent-truncation behavior:
-  - `CUI_PARENT_STACK_MAX` (16) — max container nesting depth
-  - `CUI_FOCUSABLE_MAX` (64) — max focusable widgets per frame
-  - `CUI_A11Y_MAX` (128) — max accessibility entries
-  - `CUI_LAST_CLICKED_ID_MAX` (64) — max widget ID length
-  - `CUI_FRAME_PRINTF_MAX` (65536) — max formatted string output
-- [ ] Add Windows CI (MSVC) to GitHub Actions matrix (README claims MSVC support)
-- [ ] Add ASan + UBSan build targets and CI step
-- [ ] Add `.clang-format` for consistent style enforcement
+ClearUI 1.0.0 has been released. All milestones below are complete. The public API is frozen — no breaking changes until 2.0.
 
 ---
 
-## Milestone 2: Text Input & Keyboard (0.3.0)
+## Milestone 1: Release Hygiene (0.2.0) — Done
 
-`cui_text_input` is the most visible incomplete feature. Users expect to type into it.
-
-- [ ] Wire keyboard character input through `cui_inject_char` or similar API
-- [ ] Implement cursor position tracking in text input
-- [ ] Support backspace / delete
-- [ ] Make `cui_text_input` return 1 when buffer content changes
-- [ ] Add unit tests for text input editing
-- [ ] Add integration test: type into field, read back buffer
-
----
-
-## Milestone 3: Scroll & Mouse (0.4.0)
-
-Scroll containers exist but lack real input. Mouse hover is absent entirely.
-
-- [ ] Add `cui_inject_scroll(ctx, dx, dy)` API for scroll wheel events
-- [ ] Wire scroll wheel to `CUI_NODE_SCROLL` offset
-- [ ] Clamp scroll offset to content bounds
-- [ ] Add mouse hover state tracking (`cui_inject_mouse_move`)
-- [ ] Expose hover state to widgets (button highlight on hover)
-- [ ] Optional: cursor shape changes via `cui_platform.cursor_set`
-- [ ] Add unit tests for scroll offset clamping
-- [ ] Add integration test: scroll + verify visible content region
+- [x] Add `CUI_VERSION_MAJOR/MINOR/PATCH` macros to `clearui.h`
+- [x] Create `CHANGELOG.md` and adopt [Keep a Changelog](https://keepachangelog.com/) format
+- [x] Document color format (`0xAARRGGBB`) in public header and README
+- [x] Document single-threaded contract in public header and README
+- [x] Document fixed limits and their silent-truncation behavior
+- [x] Add Windows CI (MSYS2/MinGW) to GitHub Actions matrix
+- [x] Add ASan + UBSan build targets and CI step
+- [x] Add `.clang-format` for consistent style enforcement
 
 ---
 
-## Milestone 4: Test Coverage (0.5.0)
+## Milestone 2: Text Input & Keyboard (0.3.0) — Done
 
-Fill the gaps identified in the readiness audit. Target: every public API function exercised by at least one test.
-
-- [ ] `cui_canvas` + `cui_draw_rect/circle/text` — verify draw buffer contents
-- [ ] `cui_label_styled` — verify style application
-- [ ] `cui_spacer` — verify layout sizing
-- [ ] `cui_wrap` — verify flow wrapping behavior
-- [ ] `cui_stack` — verify z-order overlap
-- [ ] Hi-DPI `scale_buf` path — verify coordinate scaling at scale_factor > 1
-- [ ] `cui_push_style` / `cui_pop_style` — verify nesting and restoration
-- [ ] `cui_frame_alloc` — verify lifetime (freed after begin_frame)
-- [ ] Edge cases: NULL arguments, zero-size allocations, empty trees
-- [ ] Add a Makefile target for ASan/UBSan test runs
+- [x] Wire keyboard character input through `cui_inject_char`
+- [x] Implement cursor position tracking in text input
+- [x] Support backspace / delete
+- [x] Make `cui_text_input` return 1 when buffer content changes
+- [x] Add unit tests for text input editing
+- [x] Add integration test: type into field, read back buffer
 
 ---
 
-## Milestone 5: Theming (0.6.0)
+## Milestone 3: Scroll & Mouse (0.4.0) — Done
 
-`theme.h` is hardcoded `#define`s. A 1.0 library needs runtime theming.
-
-- [ ] Design `cui_theme` struct (colors, radii, font size, focus ring)
-- [ ] Add `cui_set_theme(ctx, &theme)` to public API
-- [ ] Fall back to built-in defaults when no theme is set
-- [ ] Ship a dark theme preset alongside the light default
-- [ ] Update draw_cmd.c to read theme from context instead of compile-time defines
-- [ ] Add test: apply theme, verify draw command colors change
-
----
-
-## Milestone 6: Platform Backend (0.7.0)
-
-At least one real platform adapter must ship for the library to be usable.
-
-- [ ] Implement SDL3 platform adapter (`cui_platform_sdl3.c`)
-  - Window create/destroy
-  - Event polling (mouse, keyboard, scroll, resize)
-  - Clipboard get/set
-  - Cursor shape
-  - Hi-DPI scale factor query
-- [ ] Or: implement a native adapter for one OS (X11/Wayland, Win32, Cocoa)
-- [ ] Integration test: open a real window, render one frame, close
-- [ ] Document how to bring your own platform adapter
+- [x] Add `cui_inject_scroll(ctx, dx, dy)` API for scroll wheel events
+- [x] Wire scroll wheel to `CUI_NODE_SCROLL` offset
+- [x] Clamp scroll offset to content bounds
+- [x] Add mouse hover state tracking (`cui_inject_mouse_move`)
+- [x] Expose hover state to widgets (button highlight on hover)
+- [x] Optional: cursor shape changes via `cui_platform.cursor_set`
+- [x] Add unit tests for scroll offset clamping
+- [x] Add integration test: scroll + verify visible content region
 
 ---
 
-## Milestone 7: Render Driver (0.8.0)
+## Milestone 4: Test Coverage (0.5.0) — Done
 
-At least one real RDI backend must ship. The software RDI is currently a no-op.
-
-- [ ] Implement software RDI that rasterizes to an RGBA framebuffer
-  - Filled rects, rounded rects, lines
-  - Text rendering via stb_truetype glyph bitmaps
-  - Scissor clipping
-  - Present: blit framebuffer to platform surface
-- [ ] Or: implement a GPU RDI (Vulkan, Metal, OpenGL, or WebGPU)
-- [ ] Add visual regression test infrastructure (render to PNG, compare)
-- [ ] Ship a default TTF font or document how to provide one
-
----
-
-## Milestone 8: Robustness & Limits (0.9.0)
-
-Harden the library for real-world use.
-
-- [ ] Replace silent truncation with opt-in error callbacks or return codes:
-  - Parent stack overflow → return error or assert in debug
-  - Focusable/a11y overflow → warn or grow dynamically
-  - Widget ID truncation → warn in debug builds
-- [ ] Add `CUI_DEBUG` assertions for common misuse (unbalanced push/pop, etc.)
-- [ ] Audit `utf8_next` for robustness with malformed input (overlong sequences, surrogates)
-- [ ] Fuzz the UTF-8 decoder, vault hash table, and frame allocator
-- [ ] Stress test: 1000+ widgets per frame, deep nesting, rapid state churn
-- [ ] Memory leak testing (Valgrind / LeakSanitizer CI step)
+- [x] `cui_canvas` + `cui_draw_rect/circle/text` — verify draw buffer contents
+- [x] `cui_label_styled` — verify style application
+- [x] `cui_spacer` — verify layout sizing
+- [x] `cui_wrap` — verify flow wrapping behavior
+- [x] `cui_stack` — verify z-order overlap
+- [x] Hi-DPI `scale_buf` path — verify coordinate scaling at scale_factor > 1
+- [x] `cui_push_style` / `cui_pop_style` — verify nesting and restoration
+- [x] `cui_frame_alloc` — verify lifetime (freed after begin_frame)
+- [x] Edge cases: NULL arguments, zero-size allocations, empty trees
+- [x] Add a Makefile target for ASan/UBSan test runs
 
 ---
 
-## Milestone 9: API Polish (0.10.0)
+## Milestone 5: Theming (0.6.0) — Done
 
-Final API review before locking the 1.0 contract.
-
-- [ ] Review every public function signature for consistency and ergonomics
-- [ ] Resolve `cui_layout.padding` vs `padding_x`/`padding_y` ambiguity (deprecate or clarify)
-- [ ] Consider adding `cui_image` widget (texture + bounds)
-- [ ] Consider adding `cui_tooltip` or `cui_popup` container
-- [ ] Add `cui_version_string()` runtime function
-- [ ] Generate API reference documentation (Doxygen or custom)
-- [ ] Write a migration guide for any API changes since 0.1.0
-- [ ] Freeze the public API — no breaking changes after this point
+- [x] Design `cui_theme` struct (colors, radii, font size, focus ring)
+- [x] Add `cui_set_theme(ctx, &theme)` to public API
+- [x] Fall back to built-in defaults when no theme is set
+- [x] Ship a dark theme preset alongside the light default
+- [x] Update draw_cmd.c to read theme from context instead of compile-time defines
+- [x] Add test: apply theme, verify draw command colors change
 
 ---
 
-## 1.0.0 Release Checklist
+## Milestone 6: Platform Backend (0.7.0) — Done
 
-All of the above milestones complete, plus:
-
-- [ ] All unit and integration tests pass on Linux, macOS, and Windows
-- [ ] ASan, UBSan, and Valgrind clean
-- [ ] CHANGELOG.md covers every milestone
-- [ ] README updated with final API surface
-- [ ] At least one real platform backend ships (SDL3 or native)
-- [ ] At least one real render driver ships (software framebuffer or GPU)
-- [ ] `examples/demo.c` runs with a visible window and renders correctly
-- [ ] API reference documentation published
-- [ ] Tag `v1.0.0`, create GitHub release
+- [x] Implement SDL3 platform adapter (`cui_platform_sdl3.c`)
+- [x] Integration test: open a real window, render one frame, close
+- [x] Document how to bring your own platform adapter
 
 ---
 
-## Non-Goals for 1.0
+## Milestone 7: Render Driver (0.8.0) — Done
 
-These are explicitly out of scope. They may come in 1.x or 2.0:
+- [x] Implement software RDI that rasterizes to an RGBA framebuffer
+- [x] Text rendering via stb_truetype glyph bitmaps
+- [x] Scissor clipping
+- [x] Present: blit framebuffer to platform surface
+- [x] Add visual regression test infrastructure
+- [x] Ship a default TTF font path and document how to provide one
 
-- Complex text layout (BiDi, shaping via HarfBuzz)
-- Animation / transition system
-- Multi-window support
-- GPU-accelerated text (SDF atlas)
-- Built-in file dialogs or system integration widgets
-- Bindings for other languages (Python, Rust, Zig)
+---
+
+## Milestone 8: Robustness & Limits (0.9.0) — Done
+
+- [x] Replace silent truncation with opt-in error callbacks
+- [x] Add `CUI_DEBUG` assertions for common misuse (unbalanced push/pop, etc.)
+- [x] Audit and harden UTF-8 decoder (overlong sequences, surrogates)
+- [x] Fuzz the UTF-8 decoder, vault hash table, and frame allocator
+- [x] Stress test: 1000+ widgets per frame, deep nesting
+- [x] Memory leak testing (LeakSanitizer CI step)
+
+---
+
+## Milestone 9: API Polish (0.10.0) — Done
+
+- [x] Review every public function signature for consistency and ergonomics
+- [x] Resolve `cui_layout.padding` vs `padding_x`/`padding_y` ambiguity (clarified)
+- [x] Add `cui_version_string()` runtime function
+- [x] Generate API reference documentation (`docs/API.md`)
+- [x] Write a migration guide (`docs/MIGRATION.md`)
+- [x] Freeze the public API — no breaking changes after this point
+
+---
+
+## 1.0.0 Release — Done
+
+- [x] All unit and integration tests pass on Linux, macOS, and Windows
+- [x] ASan, UBSan, and LeakSanitizer clean
+- [x] CHANGELOG.md covers every milestone
+- [x] README updated with final API surface
+- [x] SDL3 platform backend ships
+- [x] Software render driver ships
+- [x] `examples/demo.c` runs headlessly and with SDL3
+- [x] API reference documentation published
+- [x] Tag `v1.0.0`, create GitHub release
+
+---
+
+## Wishlist (post-1.0)
+
+These are not committed — they may come in 1.x or 2.0. Contributions welcome.
+
+- [ ] `cui_image` widget (texture + bounds)
+- [ ] `cui_tooltip` or `cui_popup` container
+- [ ] Complex text layout (BiDi, shaping via HarfBuzz)
+- [ ] Animation / transition system
+- [ ] Multi-window support
+- [ ] GPU-accelerated text (SDF atlas)
+- [ ] GPU render driver (Vulkan, Metal, or WebGPU)
+- [ ] Built-in file dialogs or system integration widgets
+- [ ] Language bindings (Python, Rust, Zig, Odin)
+- [ ] Two-file amalgamated distribution (single header + single .c)
 
 ---
 
 ## How to Contribute
 
-Pick any unchecked item above. Each milestone maps roughly to a feature branch and spec under `specs/`. Before starting, check the existing specs to see if a plan already exists.
+Pick any wishlist item above, or file an issue with your idea. The API is frozen (additive changes only until 2.0), so new features should extend, not break, the existing surface.
+
+Design documents and feature specs live under `specs/`. The project constitution is at `.specify/memory/constitution.md`.
 
 ```bash
 make clean && make all && make unit-tests && make integration-tests
