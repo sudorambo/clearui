@@ -18,12 +18,14 @@
  * thread. No locking is performed; use from multiple threads is undefined
  * behavior.
  *
- * Fixed limits (silent truncation when exceeded):
+ * Fixed limits (silent truncation when exceeded unless an error callback is set):
  *   CUI_PARENT_STACK_MAX   (16)  — max container nesting depth
  *   CUI_FOCUSABLE_MAX      (64)  — max focusable widgets per frame
  *   CUI_A11Y_MAX           (128) — max accessibility entries
  *   CUI_LAST_CLICKED_ID_MAX(64)  — max widget ID length in bytes (incl. NUL)
  *   CUI_FRAME_PRINTF_MAX   (65536) — max cui_frame_printf output in bytes
+ * Optional: set cui_config.error_callback to be notified when a limit is hit.
+ * Define CUI_DEBUG when building to enable assertions for overflow and unbalanced push/pop.
  */
 #ifndef CLEARUI_H
 #define CLEARUI_H
@@ -44,12 +46,24 @@ typedef struct cui_platform_ctx cui_platform_ctx;
 typedef struct cui_rdi cui_rdi;
 typedef struct cui_rdi_context cui_rdi_context;
 
+/** Error codes for the optional error callback (cui_config.error_callback). */
+#define CUI_ERR_PARENT_STACK   1
+#define CUI_ERR_FOCUSABLE_FULL 2
+#define CUI_ERR_A11Y_FULL      3
+#define CUI_ERR_ID_TRUNCATED   4
+#define CUI_ERR_UNBALANCED    5
+
+/** Optional: called when a limit is exceeded or CUI_DEBUG detects misuse. userdata = config.error_userdata; limit_name_or_null can be NULL. */
+typedef void (*cui_error_fn)(void *userdata, int error_code, const char *limit_name_or_null);
+
 typedef struct cui_config {
 	const char *title;
 	int        width;           /* logical window width  (pixels) */
 	int        height;          /* logical window height (pixels) */
 	float      scale_factor;    /* display scale (1.0 = 100%); set from platform for Hi-DPI */
 	size_t     draw_buf_capacity; /* 0 = default 1024; max draw commands per buffer */
+	cui_error_fn error_callback; /* optional; NULL = silent truncation */
+	void       *error_userdata;  /* passed to error_callback */
 } cui_config;
 
 /**

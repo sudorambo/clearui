@@ -5,6 +5,7 @@
 #include "../../include/clearui_rdi.h"
 #include "../../include/clearui_platform.h"
 #include "../core/draw_cmd.h"
+#include "../core/utf8.h"
 #include "../font/atlas.h"
 #include <math.h>
 #include <stdlib.h>
@@ -216,18 +217,6 @@ static void draw_line(soft_ctx *c, float x0, float y0, float x1, float y1, float
 	}
 }
 
-/* Decode next UTF-8 codepoint; return byte advance (0 at end), codepoint in *out. */
-static int utf8_next(const unsigned char *s, int *out_cp) {
-	unsigned char c = s[0];
-	if (c == 0) { *out_cp = 0; return 0; }
-	if (c < 0x80) { *out_cp = (int)c; return 1; }
-	if (c < 0xe0 && s[1]) { *out_cp = (int)(c & 0x1f) << 6 | (int)(s[1] & 0x3f); return 2; }
-	if (c < 0xf0 && s[1] && s[2]) { *out_cp = (int)(c & 0x0f) << 12 | (int)(s[1] & 0x3f) << 6 | (int)(s[2] & 0x3f); return 3; }
-	if (c < 0xf8 && s[1] && s[2] && s[3]) { *out_cp = (int)(c & 0x07) << 18 | (int)(s[1] & 0x3f) << 12 | (int)(s[2] & 0x3f) << 6 | (int)(s[3] & 0x3f); return 4; }
-	*out_cp = (int)(c & 0x7f);
-	return 1;
-}
-
 #define CUI_SOFT_DEFAULT_FONT_SIZE 16
 
 static void draw_text(soft_ctx *c, float fx, float fy, const char *text, unsigned int color) {
@@ -243,7 +232,7 @@ static void draw_text(soft_ctx *c, float fx, float fy, const char *text, unsigne
 	int font_size = CUI_SOFT_DEFAULT_FONT_SIZE;
 	while (*p) {
 		int cp;
-		int adv = utf8_next(p, &cp);
+		int adv = cui_utf8_next(p, &cp);
 		if (adv <= 0) break;
 		unsigned char *bitmap = NULL;
 		int gw, gh, gx0, gy0, advance;

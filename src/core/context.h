@@ -56,4 +56,7 @@ cui_node        *cui_ctx_retained_root(cui_ctx *ctx);
 void             cui_ctx_build_a11y(cui_ctx *ctx);
 const cui_a11y_tree *cui_ctx_a11y_tree(cui_ctx *ctx);
 
+/** Internal: call optional error callback when a limit is hit. Safe to call with ctx NULL. */
+void cui_ctx_fire_error(cui_ctx *ctx, int error_code, const char *limit_name_or_null);
+
 #endif

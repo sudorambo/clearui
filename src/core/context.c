@@ -21,6 +21,9 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
+#ifdef CUI_DEBUG
+#include <assert.h>
+#endif
 
 #define CUI_ARENA_DEFAULT (4 * 1024 * 1024)
 #define CUI_PARENT_STACK_MAX 16          /* max container nesting depth */
@@ -101,26 +104,33 @@ static cui_node *retained_node_by_id(cui_node *n, const char *id) {
 	return NULL;
 }
 
-static void collect_focusable(cui_node *n, focusable_t *list, int *count) {
-	if (!n || !list || *count >= CUI_FOCUSABLE_MAX) return;
+static void collect_focusable(cui_ctx *ctx, cui_node *n, focusable_t *list, int *count) {
+	if (!n || !list) return;
+	if (*count >= CUI_FOCUSABLE_MAX) {
+		if (ctx) cui_ctx_fire_error(ctx, CUI_ERR_FOCUSABLE_FULL, "focusable");
+		return;
+	}
 	const char *id = NULL;
 	if (n->type == CUI_NODE_BUTTON || n->type == CUI_NODE_CHECKBOX || n->type == CUI_NODE_ICON_BUTTON || n->type == CUI_NODE_TEXT_INPUT)
 		id = n->button_id;
 	if (id && id[0]) {
 		size_t len = strlen(id);
-		if (len >= CUI_LAST_CLICKED_ID_MAX) len = CUI_LAST_CLICKED_ID_MAX - 1;
+		if (len >= CUI_LAST_CLICKED_ID_MAX) {
+			if (ctx) cui_ctx_fire_error(ctx, CUI_ERR_ID_TRUNCATED, "focusable_id");
+			len = CUI_LAST_CLICKED_ID_MAX - 1;
+		}
 		memcpy(list[*count].id, id, len + 1);
 		list[*count].tab_index = n->tab_index;
 		(*count)++;
 	}
 	for (cui_node *c = n->first_child; c; c = c->next_sibling)
-		collect_focusable(c, list, count);
+		collect_focusable(ctx, c, list, count);
 }
 
 static void build_focusable_list(cui_ctx *ctx, cui_node *root) {
 	focusable_t list[CUI_FOCUSABLE_MAX];
 	int n = 0;
-	collect_focusable(root, list, &n);
+	collect_focusable(ctx, root, list, &n);
 	qsort(list, (size_t)n, sizeof(list[0]), focusable_cmp);
 	ctx->focusable_count = n;
 	for (int i = 0; i < n && i < CUI_FOCUSABLE_MAX; i++)
@@ -201,7 +211,10 @@ static void apply_pending_char(cui_ctx *ctx) {
 	buf[(size_t)cur] = (char)(cp & 0xFF);
 	rn->text_input_cursor = cur + 1;
 	size_t fid_len = strlen(fid);
-	if (fid_len >= CUI_LAST_CLICKED_ID_MAX) fid_len = CUI_LAST_CLICKED_ID_MAX - 1;
+	if (fid_len >= CUI_LAST_CLICKED_ID_MAX) {
+		cui_ctx_fire_error(ctx, CUI_ERR_ID_TRUNCATED, "text_input_changed_id");
+		fid_len = CUI_LAST_CLICKED_ID_MAX - 1;
+	}
 	memcpy(ctx->text_input_changed_id, fid, fid_len + 1);
 }
 
@@ -274,7 +287,10 @@ static void hit_test_visit(cui_ctx *ctx, cui_node *n) {
 	    (float)ctx->last_click_x >= n->layout_x && (float)ctx->last_click_x < n->layout_x + n->layout_w &&
 	    (float)ctx->last_click_y >= n->layout_y && (float)ctx->last_click_y < n->layout_y + n->layout_h) {
 		size_t len = strlen(n->button_id);
-		if (len >= CUI_LAST_CLICKED_ID_MAX) len = CUI_LAST_CLICKED_ID_MAX - 1;
+		if (len >= CUI_LAST_CLICKED_ID_MAX) {
+			cui_ctx_fire_error(ctx, CUI_ERR_ID_TRUNCATED, "last_clicked_id");
+			len = CUI_LAST_CLICKED_ID_MAX - 1;
+		}
 		memcpy(ctx->last_clicked_id, n->button_id, len + 1);
 	}
 	for (cui_node *c = n->first_child; c; c = c->next_sibling)
@@ -288,7 +304,10 @@ static void hover_hit_test_visit(cui_ctx *ctx, cui_node *n) {
 	    (float)ctx->mouse_x >= n->layout_x && (float)ctx->mouse_x < n->layout_x + n->layout_w &&
 	    (float)ctx->mouse_y >= n->layout_y && (float)ctx->mouse_y < n->layout_y + n->layout_h) {
 		size_t len = strlen(n->button_id);
-		if (len >= CUI_LAST_CLICKED_ID_MAX) len = CUI_LAST_CLICKED_ID_MAX - 1;
+		if (len >= CUI_LAST_CLICKED_ID_MAX) {
+			cui_ctx_fire_error(ctx, CUI_ERR_ID_TRUNCATED, "hovered_id");
+			len = CUI_LAST_CLICKED_ID_MAX - 1;
+		}
 		memcpy(ctx->hovered_id, n->button_id, len + 1);
 		ctx->hovered_id[len] = '\0';
 	}
@@ -357,6 +376,9 @@ static void apply_pending_scroll(cui_ctx *ctx) {
  */
 void cui_end_frame(cui_ctx *ctx) {
 	if (!ctx) return;
+#ifdef CUI_DEBUG
+	assert(ctx->parent_top == 0 && "unbalanced push/pop: missing cui_end");
+#endif
 	process_pending_key(ctx);
 	apply_pending_char(ctx);
 	cui_diff_run(ctx->declared_root, &ctx->retained_root);
@@ -505,6 +527,11 @@ cui_frame_allocator *cui_ctx_frame(cui_ctx *ctx) { return ctx ? &ctx->frame : NU
 cui_vault *cui_ctx_vault(cui_ctx *ctx) { return ctx ? ctx->vault : NULL; }
 cui_draw_command_buffer *cui_ctx_draw_buf(cui_ctx *ctx) { return ctx ? &ctx->draw_buf : NULL; }
 const cui_config *cui_ctx_config(cui_ctx *ctx) { return ctx ? &ctx->config : NULL; }
+
+void cui_ctx_fire_error(cui_ctx *ctx, int error_code, const char *limit_name_or_null) {
+	if (!ctx || !ctx->config.error_callback) return;
+	ctx->config.error_callback(ctx->config.error_userdata, error_code, limit_name_or_null);
+}
 const cui_rdi *cui_ctx_rdi(cui_ctx *ctx) { return ctx ? ctx->rdi : NULL; }
 cui_rdi_context *cui_ctx_rdi_ctx(cui_ctx *ctx) { return ctx ? ctx->rdi_ctx : NULL; }
 cui_node **cui_ctx_root_ptr(cui_ctx *ctx) { return ctx ? &ctx->declared_root : NULL; }
@@ -512,7 +539,15 @@ cui_node *cui_ctx_current_parent(cui_ctx *ctx) {
 	return (ctx && ctx->parent_top > 0) ? ctx->parent_stack[ctx->parent_top - 1] : NULL;
 }
 void cui_ctx_push_parent(cui_ctx *ctx, cui_node *n) {
-	if (ctx && ctx->parent_top < CUI_PARENT_STACK_MAX) ctx->parent_stack[ctx->parent_top++] = n;
+	if (!ctx || !n) return;
+	if (ctx->parent_top >= CUI_PARENT_STACK_MAX) {
+		cui_ctx_fire_error(ctx, CUI_ERR_PARENT_STACK, "parent_stack");
+#ifdef CUI_DEBUG
+		assert(0 && "parent stack overflow");
+#endif
+		return;
+	}
+	ctx->parent_stack[ctx->parent_top++] = n;
 }
 void cui_ctx_pop_parent(cui_ctx *ctx) {
 	if (ctx && ctx->parent_top > 0) {

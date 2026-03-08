@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-03-07
+
+### Added
+
+- **Error callback**: Optional `cui_config.error_callback` and `error_userdata`. When a limit is exceeded (parent stack, focusable list, a11y list, widget ID truncation), the callback is invoked with an error code (`CUI_ERR_PARENT_STACK`, `CUI_ERR_FOCUSABLE_FULL`, `CUI_ERR_A11Y_FULL`, `CUI_ERR_ID_TRUNCATED`, `CUI_ERR_UNBALANCED`). NULL callback = silent truncation (unchanged behavior).
+- **CUI_DEBUG**: Define when building to enable assertions: parent stack overflow and unbalanced push/pop at end of frame. Leave undefined for release.
+- **UTF-8 robustness**: Shared decoder in `src/core/utf8.c` / `utf8.h` (`cui_utf8_next`, `cui_utf8_next_len`). Rejects overlong encodings and UTF-16 surrogates; no read past buffer. Used by font atlas and software RDI. Unit test `test_utf8`; fuzz target `make fuzz-utf8`.
+- **Fuzz targets**: `make fuzz-vault` and `make fuzz-frame` for vault and frame allocator (standalone harnesses; use Clang + `-fsanitize=fuzzer` for libFuzzer).
+- **Stress test**: `make stress` runs 1200 widgets × 10 frames; no crash.
+- **Leak check**: `make leak-check` runs unit tests under Valgrind (`--leak-check=full --errors-for-leak-kinds=definite`). `make leak-check-lsan` runs tests with LeakSanitizer when Valgrind fails at startup (e.g. ld.so memcmp redirection). CI job runs leak-check on Linux.
+
+### Changed
+
+- **Arena grow**: `grow()` in `src/core/arena.c` uses malloc + memcpy + free instead of realloc so the old block is always explicitly freed (fixes Valgrind "definitely lost" on some platforms).
+
+### Fixed
+
+- Valgrind leak-check option: use `--errors-for-leak-kinds=definite` (not `definitelylost`) for compatibility with Valgrind 3.25+.
+
+### Deprecated
+
+### Removed
+
+### Security
+
 ## [0.8.0] - 2026-03-07
 
 ### Added

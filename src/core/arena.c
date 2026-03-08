@@ -33,7 +33,10 @@ void cui_arena_free(cui_arena *a) {
 	a->pos = a->cap = 0;
 }
 
-/* Double capacity until the arena can satisfy `need` more bytes. Bails on overflow. */
+/* Double capacity until the arena can satisfy `need` more bytes. Bails on overflow.
+ * Use malloc+memcpy+free instead of realloc so the old block is always explicitly
+ * freed (avoids Valgrind "definitely lost" on some platforms where realloc is not
+ * tracked as freeing the old block). */
 static void grow(cui_arena *a, size_t need) {
 	if (a->cap > SIZE_MAX / 2) return;
 	size_t new_cap = a->cap ? a->cap * 2 : 256;
@@ -41,8 +44,11 @@ static void grow(cui_arena *a, size_t need) {
 		if (new_cap > SIZE_MAX / 2) return;
 		new_cap *= 2;
 	}
-	char *n = (char *)realloc(a->base, new_cap);
+	char *n = (char *)malloc(new_cap);
 	if (n) {
+		if (a->base && a->pos > 0)
+			memcpy(n, a->base, a->pos);
+		free(a->base);
 		a->base = n;
 		a->cap  = new_cap;
 	}

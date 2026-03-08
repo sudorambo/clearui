@@ -6,7 +6,7 @@ A C11 GUI library with a **declarative immediate** model. You write immediate-mo
 
 - **Color format**: All colors are 32-bit `0xAARRGGBB` (alpha, red, green, blue; alpha in high byte).
 - **Single-threaded**: All API calls must happen on one thread; no locking; multi-threaded use is undefined.
-- **Fixed limits** (silent truncation when exceeded): container nesting 16, focusables per frame 64, a11y entries 128, widget ID length 64 bytes, `cui_frame_printf` output 64 KiB. See `include/clearui.h` for macro names.
+- **Fixed limits** (silent truncation when exceeded unless you set an error callback): container nesting 16, focusables per frame 64, a11y entries 128, widget ID length 64 bytes, `cui_frame_printf` output 64 KiB. Set `cui_config.error_callback` and `error_userdata` to be notified when a limit is hit. Define **`CUI_DEBUG`** when building for development to enable assertions (e.g. unbalanced push/pop, parent stack overflow). See `include/clearui.h` for macro names and error codes.
 
 ## Hello World
 
@@ -80,8 +80,14 @@ Requires a C11 compiler. Nothing else.
 ```bash
 make all                # compile all objects
 make lib                # build libclearui.a
-make unit-tests         # run 23 unit tests
-make integration-tests  # run 5 integration tests
+make unit-tests         # run 24 unit tests
+make integration-tests # run 5 integration tests
+make stress             # stress test (1000+ widgets)
+make leak-check         # unit tests under Valgrind (Linux); only "definitely lost" fails
+make leak-check-lsan    # leak check via LeakSanitizer (use if Valgrind fails at startup)
+make fuzz-utf8          # build UTF-8 fuzz target (libFuzzer; needs clang)
+make fuzz-vault         # build vault fuzz harness (standalone)
+make fuzz-frame         # build frame allocator fuzz harness (standalone)
 make clean              # remove artifacts
 ```
 
@@ -111,10 +117,12 @@ src/
   rdi/                   # software RDI (rasterizes to RGBA; optional GPU backends later)
 
 tests/
-  unit/                  # 23 tests: arena, vault, layout, font, draw_buf, diff,
+  unit/                  # 24 tests: arena, vault, layout, font, utf8, draw_buf, diff,
                          #           frame_alloc, draw_cmd, a11y, focus, text_input,
                          #           scroll, canvas_draw, label_styled, spacer, wrap,
                          #           stack, style_stack, cui_frame_alloc, scale_buf, edge_cases, theme, rdi_soft
+  fuzz/                  # utf8_fuzz (libFuzzer)
+  stress/                # stress_widgets (1000+ widgets)
   integration/           # 5 tests:  hello, counter, rdi_platform, text_input_edit, scroll_region
 ```
 

@@ -5,6 +5,7 @@
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "../../deps/stb_truetype.h"
 #include "atlas.h"
+#include "core/utf8.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -36,19 +37,6 @@ static void init_font_once(void) {
 	int offset = stbtt_GetFontOffsetForIndex(s_ttf_buf, 0);
 	if (offset < 0 || !stbtt_InitFont(&s_font, s_ttf_buf, offset)) { free(s_ttf_buf); s_ttf_buf = NULL; s_inited = -1; return; }
 	s_inited = 1;
-}
-
-/* Decode next UTF-8 codepoint; return byte advance (0 at end), codepoint in *out.
- * s must be a valid C string (NUL-terminated). Truncated or non-terminated buffers cause undefined behavior (buffer overread). */
-static int utf8_next(const unsigned char *s, int *out_cp) {
-	unsigned char c = s[0];
-	if (c == 0) { *out_cp = 0; return 0; }
-	if (c < 0x80) { *out_cp = (int)c; return 1; }
-	if (c < 0xe0 && s[1]) { *out_cp = (int)(c & 0x1f) << 6 | (int)(s[1] & 0x3f); return 2; }
-	if (c < 0xf0 && s[1] && s[2]) { *out_cp = (int)(c & 0x0f) << 12 | (int)(s[1] & 0x3f) << 6 | (int)(s[2] & 0x3f); return 3; }
-	if (c < 0xf8 && s[1] && s[2] && s[3]) { *out_cp = (int)(c & 0x07) << 18 | (int)(s[1] & 0x3f) << 12 | (int)(s[2] & 0x3f) << 6 | (int)(s[3] & 0x3f); return 4; }
-	*out_cp = (int)(c & 0x7f);
-	return 1;
 }
 
 int cui_font_default_id(void) {
@@ -83,7 +71,7 @@ void cui_font_measure(int font_id, int font_size_px, const char *utf8, float *ou
 	const unsigned char *p = (const unsigned char *)utf8;
 	for (;;) {
 		int cp;
-		int adv = utf8_next(p, &cp);
+		int adv = cui_utf8_next(p, &cp);
 		if (adv == 0) break;
 		int advance, lsb;
 		stbtt_GetCodepointHMetrics(&s_font, cp, &advance, &lsb);

@@ -30,8 +30,12 @@ static const char *node_label(const cui_node *n) {
 	return "";
 }
 
-static void visit(cui_node *n, cui_a11y_tree *out, const char *focused_id) {
-	if (!n || !out || out->count >= CUI_A11Y_MAX) return;
+static void visit(cui_ctx *ctx, cui_node *n, cui_a11y_tree *out, const char *focused_id) {
+	if (!n || !out) return;
+	if (out->count >= CUI_A11Y_MAX) {
+		if (ctx) cui_ctx_fire_error(ctx, CUI_ERR_A11Y_FULL, "a11y");
+		return;
+	}
 	cui_a11y_role role = node_to_role(n);
 	if (role != CUI_A11Y_ROLE_NONE) {
 		cui_a11y_entry *e = &out->entry[out->count++];
@@ -52,12 +56,12 @@ static void visit(cui_node *n, cui_a11y_tree *out, const char *focused_id) {
 		e->h = n->layout_h;
 	}
 	for (cui_node *c = n->first_child; c; c = c->next_sibling)
-		visit(c, out, focused_id);
+		visit(ctx, c, out, focused_id);
 }
 
 void cui_a11y_build(cui_ctx *ctx, cui_node *root, cui_a11y_tree *out) {
 	if (!out) return;
 	out->count = 0;
 	const char *focused_id = cui_ctx_focused_id(ctx);
-	visit(root, out, focused_id);
+	visit(ctx, root, out, focused_id);
 }
