@@ -45,6 +45,7 @@ static cui_platform stub_platform = {
 	.scale_factor_get = NULL,
 	.surface_get = NULL,
 	.surface_destroy = NULL,
+	.present_software = NULL,
 };
 
 const cui_platform *cui_platform_stub_get(void) {

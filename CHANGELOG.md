@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-03-07
+
+### Added
+
+- **Software RDI**: The built-in `cui_rdi_soft_get()` now rasterizes the draw command buffer to an RGBA framebuffer. Implemented: filled rects, rounded rects, lines (with thickness), and text (via stb_truetype glyph bitmaps from the font atlas). Scissor commands clip subsequent draws; one active scissor per submit.
+- **Viewport and present**: `cui_rdi_soft_set_viewport(ctx, width, height)` allocates or resizes the framebuffer; call before submit. `cui_rdi_soft_set_platform(ctx, platform_ctx, platform)` wires the optional `present_software` callback so `present()` can blit the framebuffer to the window.
+- **Platform**: Optional `present_software(platform_ctx, rgba, width, height, pitch_bytes)` on `cui_platform` for software RDI blit. SDL3 adapter implements it (renderer + texture, `SDL_UpdateTexture` + `SDL_RenderPresent`); stub leaves it NULL.
+- **Font rasterization**: `cui_font_render_glyph` and `cui_font_free_glyph_bitmap` in `src/font/atlas.h` for glyph bitmaps (used by software RDI text).
+- **RDI accessor**: `cui_rdi_soft_get_framebuffer(ctx, &rgba, &width, &height)` for tests and inspection.
+- **Visual regression**: Unit test `test_rdi_soft` submits a known rect and asserts the framebuffer is non-zero; included in `make unit-tests` (23 tests).
+- **Docs**: README **Software RDI** section (viewport, present_software wiring); `deps/README.md` documents default TTF path and software RDI text; `specs/021-render-driver-0-8-0/quickstart.md` and contracts updated.
+
+### Changed
+
+- None (new APIs are additive; existing RDI and platform interfaces extended with optional fields/callbacks).
+
+### Fixed
+
+### Deprecated
+
+### Removed
+
+### Security
+
 ## [0.7.0] - 2026-03-07
 
 ### Added

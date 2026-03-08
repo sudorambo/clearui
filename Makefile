@@ -81,8 +81,10 @@ test_edge_cases: $(OBJS) tests/unit/test_edge_cases.c
 	$(CC) $(CFLAGS) -o $@ tests/unit/test_edge_cases.c $(OBJS) $(LDFLAGS)
 test_theme: $(OBJS) tests/unit/test_theme.c
 	$(CC) $(CFLAGS) -o $@ tests/unit/test_theme.c $(OBJS) $(LDFLAGS)
-unit-tests: test_arena test_vault test_layout test_font test_draw_buf test_diff test_frame_alloc test_draw_cmd test_a11y test_focus test_text_input test_scroll test_canvas_draw test_label_styled test_spacer test_wrap test_stack test_style_stack test_cui_frame_alloc test_scale_buf test_edge_cases test_theme
-	./test_arena && ./test_vault && ./test_layout && ./test_font && ./test_draw_buf && ./test_diff && ./test_frame_alloc && ./test_draw_cmd && ./test_a11y && ./test_focus && ./test_text_input && ./test_scroll && ./test_canvas_draw && ./test_label_styled && ./test_spacer && ./test_wrap && ./test_stack && ./test_style_stack && ./test_cui_frame_alloc && ./test_scale_buf && ./test_edge_cases && ./test_theme
+test_rdi_soft: $(OBJS) tests/unit/test_rdi_soft.c
+	$(CC) $(CFLAGS) -o $@ tests/unit/test_rdi_soft.c $(OBJS) $(LDFLAGS)
+unit-tests: test_arena test_vault test_layout test_font test_draw_buf test_diff test_frame_alloc test_draw_cmd test_a11y test_focus test_text_input test_scroll test_canvas_draw test_label_styled test_spacer test_wrap test_stack test_style_stack test_cui_frame_alloc test_scale_buf test_edge_cases test_theme test_rdi_soft
+	./test_arena && ./test_vault && ./test_layout && ./test_font && ./test_draw_buf && ./test_diff && ./test_frame_alloc && ./test_draw_cmd && ./test_a11y && ./test_focus && ./test_text_input && ./test_scroll && ./test_canvas_draw && ./test_label_styled && ./test_spacer && ./test_wrap && ./test_stack && ./test_style_stack && ./test_cui_frame_alloc && ./test_scale_buf && ./test_edge_cases && ./test_theme && ./test_rdi_soft
 
 # Integration tests
 test_hello: $(OBJS) tests/integration/test_hello.c
@@ -119,7 +121,7 @@ clean:
 	rm -f $(OBJS) src/platform/cui_platform_sdl3.o build/*.o build/*.a libclearui.a hello counter demo \
 		test_arena test_vault test_layout test_font test_draw_buf test_diff \
 		test_frame_alloc test_draw_cmd test_a11y test_focus test_text_input test_scroll \
-		test_canvas_draw test_label_styled test_spacer test_wrap test_stack test_style_stack test_cui_frame_alloc test_scale_buf test_edge_cases test_theme \
+		test_canvas_draw test_label_styled test_spacer test_wrap test_stack test_style_stack test_cui_frame_alloc test_scale_buf test_edge_cases test_theme test_rdi_soft \
 		test_hello test_counter test_rdi_platform test_text_input_edit test_scroll_region test_platform_window 2>/dev/null; true
 
 # Sanitizer builds (recompile everything with sanitizer flags)

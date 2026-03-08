@@ -9,9 +9,13 @@
 #include <string.h>
 
 typedef struct sdl3_ctx {
-	SDL_Window *window;
+	SDL_Window   *window;
+	SDL_Renderer *renderer;
+	SDL_Texture  *texture;
 	int width;
 	int height;
+	int tex_w;
+	int tex_h;
 } sdl3_ctx;
 
 static int window_create(cui_platform_ctx **out_ctx, const char *title, int width, int height) {
@@ -30,9 +34,17 @@ static int window_create(cui_platform_ctx **out_ctx, const char *title, int widt
 		SDL_Quit();
 		return -1;
 	}
+	memset(c, 0, sizeof(*c));
 	c->window = win;
 	c->width = width;
 	c->height = height;
+	c->renderer = SDL_CreateRenderer(win, NULL);
+	if (!c->renderer) {
+		SDL_DestroyWindow(win);
+		SDL_Quit();
+		free(c);
+		return -1;
+	}
 	*out_ctx = (cui_platform_ctx *)c;
 	return 0;
 }
@@ -40,6 +52,14 @@ static int window_create(cui_platform_ctx **out_ctx, const char *title, int widt
 static void window_destroy(cui_platform_ctx *ctx) {
 	if (!ctx) return;
 	sdl3_ctx *c = (sdl3_ctx *)ctx;
+	if (c->texture) {
+		SDL_DestroyTexture(c->texture);
+		c->texture = NULL;
+	}
+	if (c->renderer) {
+		SDL_DestroyRenderer(c->renderer);
+		c->renderer = NULL;
+	}
 	if (c->window) {
 		SDL_DestroyWindow(c->window);
 		c->window = NULL;
@@ -141,6 +161,23 @@ static float scale_factor_get(cui_platform_ctx *ctx) {
 	return scale >= 1.f ? scale : 1.f;
 }
 
+static void present_software(cui_platform_ctx *ctx, const void *rgba, int width, int height, int pitch_bytes) {
+	if (!ctx || !rgba || width <= 0 || height <= 0) return;
+	sdl3_ctx *c = (sdl3_ctx *)ctx;
+	if (!c->renderer) return;
+	if (!c->texture || c->tex_w != width || c->tex_h != height) {
+		if (c->texture) SDL_DestroyTexture(c->texture);
+		c->texture = SDL_CreateTexture(c->renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, width, height);
+		c->tex_w = width;
+		c->tex_h = height;
+		if (!c->texture) return;
+	}
+	if (SDL_UpdateTexture(c->texture, NULL, rgba, pitch_bytes) != 0) return;
+	SDL_RenderClear(c->renderer);
+	SDL_RenderTexture(c->renderer, c->texture, NULL, NULL);
+	SDL_RenderPresent(c->renderer);
+}
+
 static cui_platform sdl3_platform = {
 	.window_create = window_create,
 	.window_destroy = window_destroy,
@@ -152,6 +189,7 @@ static cui_platform sdl3_platform = {
 	.scale_factor_get = scale_factor_get,
 	.surface_get = NULL,
 	.surface_destroy = NULL,
+	.present_software = present_software,
 };
 
 const cui_platform *cui_platform_sdl3_get(void) {

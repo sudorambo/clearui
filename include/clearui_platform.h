@@ -37,6 +37,9 @@ typedef struct cui_platform {
 	/* GPU surface for RDI (e.g. swapchain); NULL if not used */
 	void *(*surface_get)(cui_platform_ctx *ctx);
 	void (*surface_destroy)(cui_platform_ctx *ctx, void *surface);
+
+	/* Software RDI: blit RGBA framebuffer to window. NULL if not supported (headless). */
+	void (*present_software)(cui_platform_ctx *ctx, const void *rgba, int width, int height, int pitch_bytes);
 } cui_platform;
 
 /* Cursor shapes for cursor_set; adapter may map to platform-specific values. */

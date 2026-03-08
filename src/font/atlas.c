@@ -92,3 +92,34 @@ void cui_font_measure(int font_id, int font_size_px, const char *utf8, float *ou
 	}
 	if (out_width) *out_width = width;
 }
+
+int cui_font_render_glyph(int font_id, int font_size_px, int codepoint,
+                          unsigned char **out_bitmap, int *out_w, int *out_h,
+                          int *out_x0, int *out_y0, int *out_advance) {
+	if (out_bitmap) *out_bitmap = NULL;
+	if (out_w) *out_w = 0;
+	if (out_h) *out_h = 0;
+	if (out_x0) *out_x0 = 0;
+	if (out_y0) *out_y0 = 0;
+	if (out_advance) *out_advance = 0;
+	if (font_id != 0 || font_size_px <= 0 || !out_bitmap) return 0;
+	init_font_once();
+	if (s_inited != 1) return 0;
+	float scale = stbtt_ScaleForPixelHeight(&s_font, (float)font_size_px);
+	int advance, lsb;
+	stbtt_GetCodepointHMetrics(&s_font, codepoint, &advance, &lsb);
+	int w, h, x0, y0;
+	unsigned char *bitmap = stbtt_GetCodepointBitmap(&s_font, 0, scale, codepoint, &w, &h, &x0, &y0);
+	if (!bitmap) return 0;
+	*out_bitmap = bitmap;
+	if (out_w) *out_w = w;
+	if (out_h) *out_h = h;
+	if (out_x0) *out_x0 = x0;
+	if (out_y0) *out_y0 = y0;
+	if (out_advance) *out_advance = (int)(scale * (float)advance);
+	return 1;
+}
+
+void cui_font_free_glyph_bitmap(unsigned char *bitmap) {
+	if (bitmap) stbtt_FreeBitmap(bitmap, NULL);
+}

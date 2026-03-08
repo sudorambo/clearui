@@ -80,7 +80,7 @@ Requires a C11 compiler. Nothing else.
 ```bash
 make all                # compile all objects
 make lib                # build libclearui.a
-make unit-tests         # run 22 unit tests
+make unit-tests         # run 23 unit tests
 make integration-tests  # run 5 integration tests
 make clean              # remove artifacts
 ```
@@ -108,13 +108,13 @@ src/
   font/                  # text measurement (vendored stb_truetype)
   widget/                # label, button, checkbox, scroll, canvas, ...
   platform/              # headless stub (swap for SDL3, GLFW, native)
-  rdi/                   # software RDI stub (swap for Vulkan, Metal, WebGPU)
+  rdi/                   # software RDI (rasterizes to RGBA; optional GPU backends later)
 
 tests/
-  unit/                  # 22 tests: arena, vault, layout, font, draw_buf, diff,
+  unit/                  # 23 tests: arena, vault, layout, font, draw_buf, diff,
                          #           frame_alloc, draw_cmd, a11y, focus, text_input,
                          #           scroll, canvas_draw, label_styled, spacer, wrap,
-                         #           stack, style_stack, cui_frame_alloc, scale_buf, edge_cases, theme
+                         #           stack, style_stack, cui_frame_alloc, scale_buf, edge_cases, theme, rdi_soft
   integration/           # 5 tests:  hello, counter, rdi_platform, text_input_edit, scroll_region
 ```
 
@@ -253,9 +253,11 @@ const cui_platform *plat = cui_platform_stub_get();
 const cui_rdi *rdi = cui_rdi_soft_get();
 ```
 
-**Bring your own platform**: Implement the `cui_platform` struct (see `include/clearui_platform.h`). **Required**: `window_create`, `window_destroy`, `window_get_size`, `poll_events`. **Optional** (set to NULL if not supported): `clipboard_get`, `clipboard_set`, `cursor_set`, `scale_factor_get`, `surface_get`, `surface_destroy`. The second argument to `poll_events` is `cui_ctx*` (passed as `void*`); use it to call `cui_inject_mouse_move`, `cui_inject_click`, `cui_inject_scroll`, `cui_inject_key`, `cui_inject_char` as events occur. Return `false` from `poll_events` when the app should quit. Call `cui_set_platform(ctx, &my_platform, my_platform_ctx)` before the first `cui_begin_frame`. See `specs/020-platform-backend-0-7-0/contracts/platform-adapter-0.7.md` and `quickstart.md` in that spec for details.
+**Bring your own platform**: Implement the `cui_platform` struct (see `include/clearui_platform.h`). **Required**: `window_create`, `window_destroy`, `window_get_size`, `poll_events`. **Optional** (set to NULL if not supported): `clipboard_get`, `clipboard_set`, `cursor_set`, `scale_factor_get`, `surface_get`, `surface_destroy`, `present_software` (for software RDI blit). The second argument to `poll_events` is `cui_ctx*` (passed as `void*`); use it to call `cui_inject_mouse_move`, `cui_inject_click`, `cui_inject_scroll`, `cui_inject_key`, `cui_inject_char` as events occur. Return `false` from `poll_events` when the app should quit. Call `cui_set_platform(ctx, &my_platform, my_platform_ctx)` before the first `cui_begin_frame`. See `specs/020-platform-backend-0-7-0/contracts/platform-adapter-0.7.md` and `quickstart.md` in that spec for details.
 
 **SDL3 adapter** (optional): Build with `WITH_SDL3=1` when SDL3 is installed (`sdl3-config` or `pkg-config SDL3`). Then link your app with `cui_platform_sdl3.o` and SDL3. The integration test `test_platform_window` opens a real window, runs one frame, and closes; it is skipped in headless CI when no display is available.
+
+**Software RDI**: The built-in `cui_rdi_soft_get()` rasterizes the draw command buffer to an RGBA framebuffer (rects, rounded rects, lines, text via stb_truetype). Call `cui_rdi_soft_set_viewport(rdi_ctx, width, height)` before each frame (e.g. from `platform->window_get_size`) so the framebuffer is allocated. To display on screen, use a platform that implements `present_software` and call `cui_rdi_soft_set_platform(rdi_ctx, platform_ctx, &platform)` so that `present()` blits the framebuffer to the window. See `specs/021-render-driver-0-8-0/quickstart.md`.
 
 ## Using the static library
 

@@ -37,6 +37,12 @@ typedef struct cui_rdi {
 } cui_rdi;
 
 const cui_rdi *cui_rdi_soft_get(void);
+/** Software RDI only: set framebuffer dimensions and allocate buffer; call before submit. No-op if ctx is NULL or w/h <= 0. */
+void cui_rdi_soft_set_viewport(cui_rdi_context *ctx, int width, int height);
+/** Software RDI only: set platform for present (blit). platform_ctx and platform can be NULL. present() will call platform->present_software when set. */
+void cui_rdi_soft_set_platform(cui_rdi_context *ctx, void *platform_ctx, const void *platform);
+/** Software RDI only: get framebuffer pointer and dimensions (for tests). Values valid until next submit or set_viewport. */
+void cui_rdi_soft_get_framebuffer(cui_rdi_context *ctx, const void **out_rgba, int *out_width, int *out_height);
 
 #ifdef __cplusplus
 }
