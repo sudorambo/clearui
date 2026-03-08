@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-03-07
+
+### Added
+
+- **Platform interface**: `cui_platform` extended with optional `scale_factor_get(ctx)` (Hi-DPI) and `poll_events(platform_ctx, void *cui_ctx)` so adapters can call `cui_inject_mouse_move`, `cui_inject_click`, etc. Cursor shape constants: `CUI_CURSOR_DEFAULT`, `CUI_CURSOR_TEXT`.
+- **SDL3 adapter** (optional): build with `WITH_SDL3=1` to compile `cui_platform_sdl3.c` and link the SDL3 platform. `cui_platform_sdl3_get()` returns the adapter; supports window, events (mouse, key, text input, scroll), clipboard, cursor, and `scale_factor_get` via `SDL_GetWindowPixelDensity`. Integration test `test_platform_window` runs a minimal windowed frame when SDL3 is available.
+- README: **Bring your own platform** (implementing `cui_platform`) and **SDL3 adapter** (build and test).
+
+### Changed
+
+- **API**: `poll_events(platform_ctx)` → `poll_events(platform_ctx, void *cui_ctx)`. Stub and SDL3 adapters updated; pass ClearUI context for event injection.
+
+### Fixed
+
+- SDL3 adapter: resolved parameter name shadowing in `poll_events` (use `app_ctx` and cast to `cui_ctx *`). Use SDL3 cursor enums `SDL_SYSTEM_CURSOR_TEXT` and `SDL_SYSTEM_CURSOR_DEFAULT` (replacing IBEAM/ARROW). Makefile fallback: when `sdl3-config`/`pkg-config` do not provide link flags, use `-lSDL3` so the SDL3 build links on typical installations.
+
+### Deprecated
+
+### Removed
+
+### Security
+
 ## [0.6.0] - 2026-03-07
 
 ### Added

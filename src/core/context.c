@@ -260,7 +260,7 @@ void cui_begin_frame(cui_ctx *ctx) {
 	cui_draw_buf_clear(&ctx->draw_buf);
 	cui_draw_buf_clear(&ctx->canvas_cmd_buf);
 	if (ctx->platform && ctx->platform->poll_events && ctx->platform_ctx)
-		ctx->running = ctx->platform->poll_events(ctx->platform_ctx) ? 1 : 0;
+		ctx->running = ctx->platform->poll_events(ctx->platform_ctx, ctx) ? 1 : 0;
 }
 
 /**

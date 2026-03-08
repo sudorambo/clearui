@@ -253,6 +253,10 @@ const cui_platform *plat = cui_platform_stub_get();
 const cui_rdi *rdi = cui_rdi_soft_get();
 ```
 
+**Bring your own platform**: Implement the `cui_platform` struct (see `include/clearui_platform.h`). **Required**: `window_create`, `window_destroy`, `window_get_size`, `poll_events`. **Optional** (set to NULL if not supported): `clipboard_get`, `clipboard_set`, `cursor_set`, `scale_factor_get`, `surface_get`, `surface_destroy`. The second argument to `poll_events` is `cui_ctx*` (passed as `void*`); use it to call `cui_inject_mouse_move`, `cui_inject_click`, `cui_inject_scroll`, `cui_inject_key`, `cui_inject_char` as events occur. Return `false` from `poll_events` when the app should quit. Call `cui_set_platform(ctx, &my_platform, my_platform_ctx)` before the first `cui_begin_frame`. See `specs/020-platform-backend-0-7-0/contracts/platform-adapter-0.7.md` and `quickstart.md` in that spec for details.
+
+**SDL3 adapter** (optional): Build with `WITH_SDL3=1` when SDL3 is installed (`sdl3-config` or `pkg-config SDL3`). Then link your app with `cui_platform_sdl3.o` and SDL3. The integration test `test_platform_window` opens a real window, runs one frame, and closes; it is skipped in headless CI when no display is available.
+
 ## Using the static library
 
 ```bash

@@ -4,6 +4,15 @@ AR     ?= ar
 CFLAGS := -std=c11 -Wall -Wextra -Wpedantic -I. -Iinclude -Isrc -Isrc/core
 LDFLAGS := -lm
 
+# Optional: WITH_SDL3=1 builds SDL3 platform adapter and test_platform_window (requires SDL3)
+WITH_SDL3 ?= 0
+SDL3_CFLAGS := $(shell sdl3-config --cflags 2>/dev/null || pkg-config --cflags SDL3 2>/dev/null)
+SDL3_LDFLAGS := $(shell sdl3-config --libs 2>/dev/null || pkg-config --libs SDL3 2>/dev/null)
+# Fallback if no sdl3-config/pkg-config: assume -lSDL3 and default include path
+ifeq ($(SDL3_LDFLAGS),)
+SDL3_LDFLAGS := -lSDL3
+endif
+
 # Sources (expand as implementation grows)
 CORE_SRCS := src/core/arena.c src/core/frame_alloc.c src/core/vault.c src/core/context.c \
 	src/core/draw_cmd.c src/core/node.c src/core/diff.c src/core/render.c src/core/a11y.c
@@ -86,8 +95,18 @@ test_text_input_edit: $(OBJS) tests/integration/test_text_input_edit.c
 	$(CC) $(CFLAGS) -o $@ tests/integration/test_text_input_edit.c $(OBJS) $(LDFLAGS)
 test_scroll_region: $(OBJS) tests/integration/test_scroll_region.c
 	$(CC) $(CFLAGS) -o $@ tests/integration/test_scroll_region.c $(OBJS) $(LDFLAGS)
+# SDL3: real window, one frame, close (build only when WITH_SDL3=1)
+ifeq ($(WITH_SDL3),1)
+src/platform/cui_platform_sdl3.o: src/platform/cui_platform_sdl3.c
+	$(CC) $(CFLAGS) $(SDL3_CFLAGS) -c -o $@ $<
+test_platform_window: $(OBJS) src/platform/cui_platform_sdl3.o tests/integration/test_platform_window.c
+	$(CC) $(CFLAGS) $(SDL3_CFLAGS) -o $@ tests/integration/test_platform_window.c $(OBJS) src/platform/cui_platform_sdl3.o $(LDFLAGS) $(SDL3_LDFLAGS)
+integration-tests: test_hello test_counter test_rdi_platform test_text_input_edit test_scroll_region test_platform_window
+	./test_hello && ./test_counter && ./test_rdi_platform && ./test_text_input_edit && ./test_scroll_region && ./test_platform_window
+else
 integration-tests: test_hello test_counter test_rdi_platform test_text_input_edit test_scroll_region
 	./test_hello && ./test_counter && ./test_rdi_platform && ./test_text_input_edit && ./test_scroll_region
+endif
 
 # Examples
 demo: $(OBJS) examples/demo.c
@@ -97,11 +116,11 @@ demo: $(OBJS) examples/demo.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -f $(OBJS) build/*.o build/*.a libclearui.a hello counter demo \
+	rm -f $(OBJS) src/platform/cui_platform_sdl3.o build/*.o build/*.a libclearui.a hello counter demo \
 		test_arena test_vault test_layout test_font test_draw_buf test_diff \
 		test_frame_alloc test_draw_cmd test_a11y test_focus test_text_input test_scroll \
 		test_canvas_draw test_label_styled test_spacer test_wrap test_stack test_style_stack test_cui_frame_alloc test_scale_buf test_edge_cases test_theme \
-		test_hello test_counter test_rdi_platform test_text_input_edit test_scroll_region 2>/dev/null; true
+		test_hello test_counter test_rdi_platform test_text_input_edit test_scroll_region test_platform_window 2>/dev/null; true
 
 # Sanitizer builds (recompile everything with sanitizer flags)
 ASAN_FLAGS := -fsanitize=address -fno-omit-frame-pointer -g

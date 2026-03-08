@@ -28,8 +28,9 @@ static void window_get_size(cui_platform_ctx *ctx, int *width, int *height) {
 	if (height) *height = c ? c->height : 0;
 }
 
-static bool poll_events(cui_platform_ctx *ctx) {
+static bool poll_events(cui_platform_ctx *ctx, void *cui_ctx) {
 	(void)ctx;
+	(void)cui_ctx;
 	return true;
 }
 
@@ -41,6 +42,7 @@ static cui_platform stub_platform = {
 	.clipboard_get = NULL,
 	.clipboard_set = NULL,
 	.cursor_set = NULL,
+	.scale_factor_get = NULL,
 	.surface_get = NULL,
 	.surface_destroy = NULL,
 };

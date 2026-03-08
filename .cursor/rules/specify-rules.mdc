@@ -27,6 +27,7 @@ Auto-generated from all feature plans. Last updated: 2026-03-07
 - N/A (tests only; no new persistent state) (018-test-coverage-0.5.0)
 - C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (stdlib only) (019-theming-0.6.0)
 - Theme stored in `cui_ctx` (struct copy or pointer to default); app-owned theme struct when set (019-theming-0.6.0)
+- C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + SDL3 for the SDL3 adapter (optional dependency; build when SDL3 available) or none for a minimal native adapter. Zero deps for “bring your own” documentation. (020-platform-backend-0-7-0)
 
 - C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (zero external dependencies) (002-fix-gitignore)
 
@@ -46,9 +47,9 @@ tests/
 C11 (`-std=c11 -Wall -Wextra -Wpedantic`): Follow standard conventions
 
 ## Recent Changes
+- 020-platform-backend-0-7-0: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + SDL3 for the SDL3 adapter (optional dependency; build when SDL3 available) or none for a minimal native adapter. Zero deps for “bring your own” documentation.
 - 019-theming-0.6.0: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (stdlib only)
 - 018-test-coverage-0.5.0: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (stdlib only; existing stub platform/RDI for tests)
-- 017-scroll-mouse-0.4.0: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (stdlib only; platform adapter for optional cursor_set)
 
 
 <!-- MANUAL ADDITIONS START -->
