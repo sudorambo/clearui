@@ -1,6 +1,12 @@
 # Migration Guide
 
-Upgrade notes for ClearUI from 0.1.0 through 0.10.0. See [CHANGELOG.md](../CHANGELOG.md) for full release details.
+Upgrade notes for ClearUI from 0.1.0 through 1.0.0. See [CHANGELOG.md](../CHANGELOG.md) for full release details.
+
+## 1.0.0
+
+- **Stable release**: First stable version. All milestones complete; public API is frozen (no breaking changes until 2.0).
+- **Version**: `cui_version_string()` now returns `"1.0.0"`.
+- No API changes from 0.10.0.
 
 ## 0.10.0
 

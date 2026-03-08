@@ -34,6 +34,7 @@ Auto-generated from all feature plans. Last updated: 2026-03-07
 - N/A (limits and error state in context or config). (022-robustness-limits-0-9-0)
 - C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None for core; optional Doxygen for API reference generation. (023-api-polish-0-10-0)
 - N/A (version string is static or derived from macros). (023-api-polish-0-10-0)
+- C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None for core; SDL3 optional for demo window; Doxygen optional for docs. (024-release-1-0-0)
 
 - C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None (zero external dependencies) (002-fix-gitignore)
 
@@ -53,9 +54,9 @@ tests/
 C11 (`-std=c11 -Wall -Wextra -Wpedantic`): Follow standard conventions
 
 ## Recent Changes
+- 024-release-1-0-0: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None for core; SDL3 optional for demo window; Doxygen optional for docs.
 - 023-api-polish-0-10-0: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None for core; optional Doxygen for API reference generation.
 - 022-robustness-limits-0-9-0: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + None for core; fuzz: libFuzzer or AFL (compiler/build option); leak: Valgrind or LeakSanitizer (CI).
-- 021-render-driver-0-8-0: Added C11 (`-std=c11 -Wall -Wextra -Wpedantic`) + Vendored stb_truetype (existing in font atlas); optional stb_image_write or minimal PNG write for visual regression if not comparing raw buffer checksums. No new mandatory deps.
 
 
 <!-- MANUAL ADDITIONS START -->

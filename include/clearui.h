@@ -30,8 +30,8 @@
 #ifndef CLEARUI_H
 #define CLEARUI_H
 
-#define CUI_VERSION_MAJOR 0
-#define CUI_VERSION_MINOR 10
+#define CUI_VERSION_MAJOR 1
+#define CUI_VERSION_MINOR 0
 #define CUI_VERSION_PATCH 0
 
 /** Runtime version string (e.g. "0.10.0"). Matches CUI_VERSION_MAJOR.MINOR.PATCH. Not thread-safe. */

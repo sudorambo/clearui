@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-03-08
+
+### Added
+
+- **Stable release**: First stable version of ClearUI. All milestones 0.2.0–0.10.0 complete.
+
+### Changed
+
+- **Version**: `CUI_VERSION_MAJOR.MINOR.PATCH` set to 1.0.0. `cui_version_string()` returns `"1.0.0"`.
+- **API frozen**: Public API locked as of 0.10.0; no breaking changes until 2.0.
+
+### Fixed
+
+### Deprecated
+
+### Removed
+
+### Security
+
 ## [0.10.0] - 2026-03-07
 
 ### Added
