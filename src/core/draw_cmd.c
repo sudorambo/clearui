@@ -101,7 +101,7 @@ void cui_build_draw_from_tree(cui_ctx *ctx, cui_node *root, cui_draw_command_buf
 			cui_draw_buf_push_text(buf, root->layout_x + ox + 4, root->layout_y + oy + 4, root->text_input_buf, CUI_THEME_DEFAULT_TEXT_COLOR);
 		if (is_focused) push_focus_ring(buf, root->layout_x, root->layout_y, root->layout_w, root->layout_h, ox, oy);
 	}
-	if (ctx && root->type == CUI_NODE_CANVAS && cui_ctx_canvas_node(ctx) == root) {
+	if (ctx && root->type == CUI_NODE_CANVAS) {
 		replay_canvas_buf(buf, cui_ctx_canvas_buf(ctx), root->layout_x + ox, root->layout_y + oy);
 		return;
 	}

@@ -80,8 +80,8 @@ Requires a C11 compiler. Nothing else.
 ```bash
 make all                # compile all objects
 make lib                # build libclearui.a
-make unit-tests         # run 10 unit tests
-make integration-tests  # run 3 integration tests
+make unit-tests         # run 21 unit tests
+make integration-tests  # run 5 integration tests
 make clean              # remove artifacts
 ```
 
@@ -111,9 +111,11 @@ src/
   rdi/                   # software RDI stub (swap for Vulkan, Metal, WebGPU)
 
 tests/
-  unit/                  # 10 tests: arena, vault, layout, font, draw_buf,
-                         #           diff, frame_alloc, draw_cmd, a11y, focus
-  integration/           # 3 tests:  hello, counter, rdi_platform
+  unit/                  # 21 tests: arena, vault, layout, font, draw_buf, diff,
+                         #           frame_alloc, draw_cmd, a11y, focus, text_input,
+                         #           scroll, canvas_draw, label_styled, spacer, wrap,
+                         #           stack, style_stack, cui_frame_alloc, scale_buf, edge_cases
+  integration/           # 5 tests:  hello, counter, rdi_platform, text_input_edit, scroll_region
 ```
 
 ## Architecture

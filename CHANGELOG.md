@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-03-07
+
+### Added
+
+- Unit tests for previously untested public APIs: `test_canvas_draw` (cui_canvas, cui_draw_rect, cui_draw_circle, cui_draw_text and draw buffer contents), `test_label_styled` (cui_label_styled style application), `test_spacer` (cui_spacer layout sizing), `test_wrap` (cui_wrap flow wrapping), `test_stack` (cui_stack z-order overlap), `test_style_stack` (cui_push_style / cui_pop_style nesting and restoration), `test_cui_frame_alloc` (cui_frame_alloc lifetime across frames), `test_scale_buf` (Hi-DPI scale_buf path when scale_factor > 1), `test_edge_cases` (NULL ctx, empty frame). Every public API listed in Milestone 4 is now exercised by at least one test.
+- All new unit tests are included in `make unit-tests`, `make asan`, and `make ubsan`.
+
+### Changed
+
+- None (no public API changes).
+
+### Fixed
+
+- Canvas draw commands were not replayed into the main draw buffer when building the draw tree: the condition required `cui_ctx_canvas_node(ctx) == root`, but that is cleared when leaving the canvas block. Replay now runs for any `CUI_NODE_CANVAS` node so canvas content is drawn correctly.
+
+### Deprecated
+
+### Removed
+
+### Security
+
 ## [0.4.0] - 2026-03-07
 
 ### Added

@@ -52,8 +52,26 @@ test_text_input: $(OBJS) tests/unit/test_text_input.c
 	$(CC) $(CFLAGS) -o $@ tests/unit/test_text_input.c $(OBJS) $(LDFLAGS)
 test_scroll: $(OBJS) tests/unit/test_scroll.c
 	$(CC) $(CFLAGS) -o $@ tests/unit/test_scroll.c $(OBJS) $(LDFLAGS)
-unit-tests: test_arena test_vault test_layout test_font test_draw_buf test_diff test_frame_alloc test_draw_cmd test_a11y test_focus test_text_input test_scroll
-	./test_arena && ./test_vault && ./test_layout && ./test_font && ./test_draw_buf && ./test_diff && ./test_frame_alloc && ./test_draw_cmd && ./test_a11y && ./test_focus && ./test_text_input && ./test_scroll
+test_canvas_draw: $(OBJS) tests/unit/test_canvas_draw.c
+	$(CC) $(CFLAGS) -o $@ tests/unit/test_canvas_draw.c $(OBJS) $(LDFLAGS)
+test_label_styled: $(OBJS) tests/unit/test_label_styled.c
+	$(CC) $(CFLAGS) -o $@ tests/unit/test_label_styled.c $(OBJS) $(LDFLAGS)
+test_spacer: $(OBJS) tests/unit/test_spacer.c
+	$(CC) $(CFLAGS) -o $@ tests/unit/test_spacer.c $(OBJS) $(LDFLAGS)
+test_wrap: $(OBJS) tests/unit/test_wrap.c
+	$(CC) $(CFLAGS) -o $@ tests/unit/test_wrap.c $(OBJS) $(LDFLAGS)
+test_stack: $(OBJS) tests/unit/test_stack.c
+	$(CC) $(CFLAGS) -o $@ tests/unit/test_stack.c $(OBJS) $(LDFLAGS)
+test_style_stack: $(OBJS) tests/unit/test_style_stack.c
+	$(CC) $(CFLAGS) -o $@ tests/unit/test_style_stack.c $(OBJS) $(LDFLAGS)
+test_cui_frame_alloc: $(OBJS) tests/unit/test_cui_frame_alloc.c
+	$(CC) $(CFLAGS) -o $@ tests/unit/test_cui_frame_alloc.c $(OBJS) $(LDFLAGS)
+test_scale_buf: $(OBJS) tests/unit/test_scale_buf.c
+	$(CC) $(CFLAGS) -o $@ tests/unit/test_scale_buf.c $(OBJS) $(LDFLAGS)
+test_edge_cases: $(OBJS) tests/unit/test_edge_cases.c
+	$(CC) $(CFLAGS) -o $@ tests/unit/test_edge_cases.c $(OBJS) $(LDFLAGS)
+unit-tests: test_arena test_vault test_layout test_font test_draw_buf test_diff test_frame_alloc test_draw_cmd test_a11y test_focus test_text_input test_scroll test_canvas_draw test_label_styled test_spacer test_wrap test_stack test_style_stack test_cui_frame_alloc test_scale_buf test_edge_cases
+	./test_arena && ./test_vault && ./test_layout && ./test_font && ./test_draw_buf && ./test_diff && ./test_frame_alloc && ./test_draw_cmd && ./test_a11y && ./test_focus && ./test_text_input && ./test_scroll && ./test_canvas_draw && ./test_label_styled && ./test_spacer && ./test_wrap && ./test_stack && ./test_style_stack && ./test_cui_frame_alloc && ./test_scale_buf && ./test_edge_cases
 
 # Integration tests
 test_hello: $(OBJS) tests/integration/test_hello.c
@@ -80,6 +98,7 @@ clean:
 	rm -f $(OBJS) build/*.o build/*.a libclearui.a hello counter demo \
 		test_arena test_vault test_layout test_font test_draw_buf test_diff \
 		test_frame_alloc test_draw_cmd test_a11y test_focus test_text_input test_scroll \
+		test_canvas_draw test_label_styled test_spacer test_wrap test_stack test_style_stack test_cui_frame_alloc test_scale_buf test_edge_cases \
 		test_hello test_counter test_rdi_platform test_text_input_edit test_scroll_region 2>/dev/null; true
 
 # Sanitizer builds (recompile everything with sanitizer flags)
