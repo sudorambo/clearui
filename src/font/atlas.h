@@ -1,11 +1,28 @@
 #ifndef CLEARUI_FONT_ATLAS_H
 #define CLEARUI_FONT_ATLAS_H
 
+#include <stddef.h>
+
 /**
  * Font atlas: default font id and text measurement for layout/draw.
  * Full SDF atlas and optional HarfBuzz for complex scripts are follow-ups.
  */
 int cui_font_default_id(void);
+
+/**
+ * Override the default font file path at runtime.  Must be called before any
+ * text measurement or rendering (i.e. before the first cui_begin_frame).
+ * Pass NULL to reset to the compile-time default ("deps/default_font.ttf").
+ */
+void cui_set_font_path(const char *path);
+
+/**
+ * Load a font from memory, bypassing file I/O entirely.  The data is copied
+ * internally; the caller may free it after this call returns.  Must be called
+ * before any text measurement or rendering.  Returns 0 on success, -1 on
+ * failure (bad data, allocation error, or font already initialised).
+ */
+int cui_load_font_memory(const void *data, size_t len);
 
 /**
  * Measure a UTF-8 string for the given font and size.

@@ -10,12 +10,18 @@
 #include <string.h>
 #include <stdio.h>
 
-#define CUI_FONT_TTF_PATH "deps/default_font.ttf"
+#ifdef CLEARUI_EMBED_FONT
+#include "default_font_embed.h"
+#endif
+
+#define CUI_FONT_TTF_PATH_DEFAULT "deps/default_font.ttf"
 #define CUI_FONT_TTF_MAX (512 * 1024)
 
 static stbtt_fontinfo s_font;
 static unsigned char *s_ttf_buf;
 static int s_inited; /* 0=not tried, 1=ok, -1=failed */
+static char s_font_path[1024];
+static int  s_font_path_set;
 
 /* TTF magic: 0x00010000 (true) or 'OTTO' for OTF */
 static int is_ttf_or_otf(const unsigned char *buf, size_t n) {
@@ -25,17 +31,58 @@ static int is_ttf_or_otf(const unsigned char *buf, size_t n) {
 	return 0;
 }
 
+static int init_from_buffer(const unsigned char *data, size_t len) {
+	if (len < 4 || !is_ttf_or_otf(data, len)) return -1;
+	int offset = stbtt_GetFontOffsetForIndex(data, 0);
+	if (offset < 0 || !stbtt_InitFont(&s_font, data, offset)) return -1;
+	return 0;
+}
+
+void cui_set_font_path(const char *path) {
+	if (path) {
+		size_t n = strlen(path);
+		if (n >= sizeof(s_font_path)) n = sizeof(s_font_path) - 1;
+		memcpy(s_font_path, path, n);
+		s_font_path[n] = '\0';
+		s_font_path_set = 1;
+	} else {
+		s_font_path[0] = '\0';
+		s_font_path_set = 0;
+	}
+}
+
+int cui_load_font_memory(const void *data, size_t len) {
+	if (s_inited != 0) return -1;
+	if (!data || len < 4) { s_inited = -1; return -1; }
+	s_ttf_buf = (unsigned char *)malloc(len);
+	if (!s_ttf_buf) { s_inited = -1; return -1; }
+	memcpy(s_ttf_buf, data, len);
+	if (init_from_buffer(s_ttf_buf, len) != 0) {
+		free(s_ttf_buf); s_ttf_buf = NULL; s_inited = -1; return -1;
+	}
+	s_inited = 1;
+	return 0;
+}
+
 static void init_font_once(void) {
 	if (s_inited != 0) return;
+
+#ifdef CLEARUI_EMBED_FONT
+	(void)cui_load_font_memory(clearui_default_font_ttf, clearui_default_font_ttf_len);
+	if (s_inited == 1) return;
+	s_inited = 0; /* fall through to file path */
+#endif
+
+	const char *path = s_font_path_set ? s_font_path : CUI_FONT_TTF_PATH_DEFAULT;
 	s_ttf_buf = (unsigned char *)malloc(CUI_FONT_TTF_MAX);
 	if (!s_ttf_buf) { s_inited = -1; return; }
-	FILE *f = fopen(CUI_FONT_TTF_PATH, "rb");
+	FILE *f = fopen(path, "rb");
 	if (!f) { free(s_ttf_buf); s_ttf_buf = NULL; s_inited = -1; return; }
 	size_t n = fread(s_ttf_buf, 1, CUI_FONT_TTF_MAX, f);
 	fclose(f);
-	if (n < 4 || !is_ttf_or_otf(s_ttf_buf, n)) { free(s_ttf_buf); s_ttf_buf = NULL; s_inited = -1; return; }
-	int offset = stbtt_GetFontOffsetForIndex(s_ttf_buf, 0);
-	if (offset < 0 || !stbtt_InitFont(&s_font, s_ttf_buf, offset)) { free(s_ttf_buf); s_ttf_buf = NULL; s_inited = -1; return; }
+	if (init_from_buffer(s_ttf_buf, n) != 0) {
+		free(s_ttf_buf); s_ttf_buf = NULL; s_inited = -1; return;
+	}
 	s_inited = 1;
 }
 

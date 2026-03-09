@@ -1,6 +1,17 @@
 # Migration Guide
 
-Upgrade notes for ClearUI from 0.1.0 through 1.0.0. See [CHANGELOG.md](../CHANGELOG.md) for full release details.
+Upgrade notes for ClearUI from 0.1.0 through 1.1.0. See [CHANGELOG.md](../CHANGELOG.md) for full release details.
+
+## 1.1.0
+
+- **No breaking changes.** All additions are purely additive.
+- **Added**: `cui_set_font_path(path)` and `cui_load_font_memory(data, len)` for runtime font configuration. Call either before the first `cui_begin_frame`. See `include/clearui.h`.
+- **Added**: `make overlay` target produces `libclearui_overlay.a` (core + soft RDI + platform stub in a single archive). Use this if you were manually compiling `clearui_rdi_soft.c` and `cui_platform_stub.c` alongside `libclearui.a`.
+- **Added**: Reference Vulkan overlay shaders (`shaders/overlay.vert`, `shaders/overlay.frag`) with pre-compiled SPIR-V and a C header embed (`include/clearui_overlay_spv.h`).
+- **Added**: Vulkan integration example (`examples/vulkan_overlay.c`).
+- **Added**: CMakeLists.txt with `clearui` and `clearui_overlay` targets, install rules, `find_package(ClearUI)`, and `clearui.pc` for pkg-config.
+- **Added**: `CLEARUI_EMBED_FONT` build option to embed the default TTF as a C byte array.
+- **Version**: `cui_version_string()` now returns `"1.1.0"`.
 
 ## 1.0.0
 

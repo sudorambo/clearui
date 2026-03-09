@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-03-09
+
+### Added
+
+- **Overlay shaders**: Reference Vulkan overlay shaders in `shaders/overlay.vert` (fullscreen triangle) and `shaders/overlay.frag` (texture sampling with RGBA/BGRA push-constant toggle). GLSL 450.
+- **Pre-compiled SPIR-V**: `shaders/overlay.vert.spv` and `shaders/overlay.frag.spv` ship alongside the GLSL source. `include/clearui_overlay_spv.h` embeds the SPIR-V as `static const unsigned char[]` arrays for zero-dependency integration. `make shaders` recompiles from GLSL and regenerates the header (requires `glslangValidator` or `glslc`).
+- **Vulkan integration example**: `examples/vulkan_overlay.c` (~280 lines) demonstrates end-to-end overlay compositing — texture creation, RGBA upload, pipeline/descriptor setup using the shipped SPIR-V, fullscreen-triangle draw, and cleanup.
+- **Font path override**: `cui_set_font_path(const char *path)` — set the TTF file path at runtime, replacing the hardcoded `"deps/default_font.ttf"`. Call before any text measurement or rendering.
+- **Font from memory**: `cui_load_font_memory(const void *data, size_t len)` — load a font from an in-memory buffer, bypassing file I/O. The data is copied internally.
+- **Embedded font build option**: Define `CLEARUI_EMBED_FONT` at compile time to embed the default TTF as a C byte array. `make embed-font` generates `src/font/default_font_embed.h` via `xxd -i`. CMake exposes this as `option(CLEARUI_EMBED_FONT)`.
+- **Overlay library**: `make overlay` produces `libclearui_overlay.a`, which includes the core library plus the soft RDI and platform stub — a single archive for overlay consumers.
+- **CMake build**: Top-level `CMakeLists.txt` with `clearui` and `clearui_overlay` library targets, install rules (headers, libraries, shaders), CMake package config (`find_package(ClearUI)`), and `clearui.pc` for pkg-config.
+- **pkg-config**: `clearui.pc.in` template; generated during CMake install.
+
+### Changed
+
+- **Version**: `CUI_VERSION_MAJOR.MINOR.PATCH` set to 1.1.0. `cui_version_string()` returns `"1.1.0"`.
+
+### Fixed
+
+### Deprecated
+
+### Removed
+
+### Security
+
 ## [1.0.0] - 2026-03-08
 
 **ClearUI 1.0.0 — Official Release.**

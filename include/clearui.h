@@ -31,7 +31,7 @@
 #define CLEARUI_H
 
 #define CUI_VERSION_MAJOR 1
-#define CUI_VERSION_MINOR 0
+#define CUI_VERSION_MINOR 1
 #define CUI_VERSION_PATCH 0
 
 /** Runtime version string (e.g. "0.10.0"). Matches CUI_VERSION_MAJOR.MINOR.PATCH. Not thread-safe. */
@@ -145,6 +145,10 @@ void *cui_frame_alloc(cui_ctx *ctx, size_t size);
  * format-string risk and unbounded allocation. Max output: 64 KiB.
  */
 const char *cui_frame_printf(cui_ctx *ctx, const char *fmt, ...);
+
+/* Font configuration — call before any text measurement or rendering. */
+void cui_set_font_path(const char *path);
+int  cui_load_font_memory(const void *data, size_t len);
 
 void cui_push_style(cui_ctx *ctx, const cui_style *style);
 void cui_pop_style(cui_ctx *ctx);

@@ -36,6 +36,14 @@ lib: libclearui.a
 libclearui.a: $(LIB_OBJS)
 	$(AR) rcs $@ $(LIB_OBJS)
 
+# Overlay library (core + font + layout + widgets + soft RDI + platform stub)
+OVERLAY_SRCS := $(LIB_SRCS) $(RDI_SRCS) $(PLAT_SRCS)
+OVERLAY_OBJS := $(OVERLAY_SRCS:.c=.o)
+
+overlay: libclearui_overlay.a
+libclearui_overlay.a: $(OVERLAY_OBJS)
+	$(AR) rcs $@ $(OVERLAY_OBJS)
+
 # Unit tests
 test_arena: tests/unit/test_arena.c src/core/arena.c
 	$(CC) $(CFLAGS) -o $@ tests/unit/test_arena.c src/core/arena.c $(LDFLAGS)
@@ -120,7 +128,7 @@ demo: $(OBJS) examples/demo.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 clean:
-	rm -f $(OBJS) src/platform/cui_platform_sdl3.o build/*.o build/*.a libclearui.a hello counter demo \
+	rm -f $(OBJS) src/platform/cui_platform_sdl3.o build/*.o build/*.a libclearui.a libclearui_overlay.a hello counter demo \
 		test_arena test_vault test_layout test_font test_draw_buf test_diff \
 		test_frame_alloc test_draw_cmd test_a11y test_focus test_text_input test_scroll \
 		test_canvas_draw test_label_styled test_spacer test_wrap test_stack test_style_stack test_cui_frame_alloc test_scale_buf test_edge_cases test_theme test_rdi_soft test_utf8 \
@@ -167,8 +175,49 @@ leak-check-lsan: unit-tests
 	$(MAKE) -s unit-tests CFLAGS="$(CFLAGS) -fsanitize=leak -g" LDFLAGS="$(LDFLAGS) -fsanitize=leak"
 	@echo "LeakSanitizer run passed (no leaks reported)."
 
+# Shader compilation (requires glslangValidator or glslc)
+GLSLC ?= $(shell command -v glslangValidator 2>/dev/null || command -v glslc 2>/dev/null)
+
+shaders: shaders/overlay.vert.spv shaders/overlay.frag.spv include/clearui_overlay_spv.h
+shaders/overlay.vert.spv: shaders/overlay.vert
+	$(GLSLC) -V -o $@ $<
+shaders/overlay.frag.spv: shaders/overlay.frag
+	$(GLSLC) -V -o $@ $<
+include/clearui_overlay_spv.h: shaders/overlay.vert.spv shaders/overlay.frag.spv
+	@echo '#ifndef CLEARUI_OVERLAY_SPV_H' > $@
+	@echo '#define CLEARUI_OVERLAY_SPV_H' >> $@
+	@echo '' >> $@
+	@echo '/* Auto-generated — re-generate with: make shaders */' >> $@
+	@echo '' >> $@
+	@echo 'static const unsigned char clearui_overlay_vert_spv[] = {' >> $@
+	@xxd -i < shaders/overlay.vert.spv >> $@
+	@echo '};' >> $@
+	@echo '' >> $@
+	@echo 'static const unsigned char clearui_overlay_frag_spv[] = {' >> $@
+	@xxd -i < shaders/overlay.frag.spv >> $@
+	@echo '};' >> $@
+	@echo '' >> $@
+	@echo '#endif /* CLEARUI_OVERLAY_SPV_H */' >> $@
+
+# Embedded font: convert default TTF to a C byte array header
+embed-font: src/font/default_font_embed.h
+src/font/default_font_embed.h: deps/default_font.ttf
+	@echo '#ifndef CLEARUI_DEFAULT_FONT_EMBED_H' > $@
+	@echo '#define CLEARUI_DEFAULT_FONT_EMBED_H' >> $@
+	@echo '' >> $@
+	@echo '/* Auto-generated — re-generate with: make embed-font */' >> $@
+	@echo '' >> $@
+	@echo 'static const unsigned char clearui_default_font_ttf[] = {' >> $@
+	@xxd -i < deps/default_font.ttf >> $@
+	@echo '};' >> $@
+	@echo 'static const unsigned int clearui_default_font_ttf_len =' >> $@
+	@wc -c < deps/default_font.ttf | tr -d ' ' >> $@
+	@echo ';' >> $@
+	@echo '' >> $@
+	@echo '#endif /* CLEARUI_DEFAULT_FONT_EMBED_H */' >> $@
+
 # API reference (Markdown); optional: install Doxygen and add a Doxyfile for HTML
 docs: docs/API.md
 	@echo "API reference: docs/API.md (see also include/clearui.h)"
 
-.PHONY: all lib clean unit-tests integration-tests demo asan ubsan fuzz-utf8 fuzz-vault fuzz-frame stress leak-check leak-check-lsan docs
+.PHONY: all lib overlay clean unit-tests integration-tests demo asan ubsan fuzz-utf8 fuzz-vault fuzz-frame stress leak-check leak-check-lsan docs shaders embed-font

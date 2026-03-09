@@ -1,6 +1,6 @@
 # ClearUI API Reference
 
-Public API as of 0.10.0. See `include/clearui.h`, `include/clearui_platform.h`, and `include/clearui_rdi.h` for full declarations.
+Public API as of 1.1.0. See `include/clearui.h`, `include/clearui_platform.h`, and `include/clearui_rdi.h` for full declarations.
 
 ## Version
 
@@ -28,6 +28,13 @@ Public API as of 0.10.0. See `include/clearui.h`, `include/clearui_platform.h`, 
 | `cui_state(ctx, key, size)` | Persistent block keyed by string; zero-initialized; valid for context lifetime. |
 | `cui_frame_alloc(ctx, size)` | Per-frame bump allocation; valid until next cui_begin_frame. |
 | `cui_frame_printf(ctx, fmt, ...)` | sprintf into frame buffer; max 64 KiB; valid until next cui_begin_frame. |
+
+## Font configuration
+
+| API | Description |
+|-----|-------------|
+| `cui_set_font_path(const char *path)` | Override the default font file path at runtime. Call before any text measurement. Pass NULL to reset. |
+| `cui_load_font_memory(const void *data, size_t len)` | Load a font from an in-memory buffer (data is copied). Call before any text measurement. Returns 0 on success, -1 on failure. |
 
 ## Theming and style
 

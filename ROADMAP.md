@@ -1,8 +1,8 @@
 # ClearUI Roadmap
 
-**Current version: 1.0.0 (stable)**
+**Current version: 1.1.0 (stable)**
 
-ClearUI 1.0.0 has been released. All milestones below are complete. The public API is frozen — no breaking changes until 2.0.
+ClearUI 1.1.0 has been released. The public API is frozen — no breaking changes until 2.0. New APIs are additive only.
 
 ---
 
@@ -124,7 +124,21 @@ ClearUI 1.0.0 has been released. All milestones below are complete. The public A
 
 ---
 
-## Wishlist (post-1.0)
+## Milestone 10: Overlay & Integration (1.1.0) — Done
+
+- [x] Ship reference overlay shaders (GLSL 450) for Vulkan compositing
+- [x] Ship pre-compiled SPIR-V and a C byte-array header for zero-dependency embedding
+- [x] Vulkan integration example (`examples/vulkan_overlay.c`)
+- [x] RGBA/BGRA push-constant toggle in the fragment shader
+- [x] Configurable font path at runtime (`cui_set_font_path`)
+- [x] Load font from memory without file I/O (`cui_load_font_memory`)
+- [x] Embedded font build option (`CLEARUI_EMBED_FONT`)
+- [x] `make overlay` target producing `libclearui_overlay.a` (core + soft RDI + stub)
+- [x] CMakeLists.txt with install rules, CMake package config, and pkg-config
+
+---
+
+## Wishlist (post-1.1)
 
 These are not committed — they may come in 1.x or 2.0. Contributions welcome.
 
